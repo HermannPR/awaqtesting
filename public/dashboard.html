@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Mawi</title>    <meta name="description" content="Dashboard de Mawi" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="css/sidebar-styles.css" />
+  </head><body data-page="dashboard">
+    <div class="mawi-app-container">
+      <header class="mawi-header">
+        <div class="logo">
+          <img src="eye-icon.svg" alt="Mawi" class="eye-icon" />
+          <h2>Mawi</h2>
+        </div>
+        <div class="user-menu">
+          <span>Usuario</span>
+          <div class="avatar-circle">
+            <a href="perfil.html">
+              <img src="avatar-placeholder.svg" alt="Usuario" />
+            </a>
+          </div>
+          <button onclick="logout()" class="logout-btn" title="Cerrar sesión">
+            🚪
+          </button>
+        </div>      <!-- Botón toggle de la sidebar -->
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Abrir/cerrar menú lateral">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9,18 15,12 9,6"></polyline>
+        </svg>
+      </button>
+      </header>
+
+      <div class="app-content with-sidebar">
+        <!-- Contenedor para la sidebar -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main content -->
+        <main class="main-content">
+          <div class="dashboard-content">
+        <div class="services-grid">
+          <a href="biomo.html" class="service-card">
+            <div class="icon-container">
+              <img src="biomo-icon.svg" alt="Biomo" class="service-icon" />
+            </div>
+            <h3>Asistente de Mi Biomo</h3>
+            <p>
+              El asistente te ayudará a conocer todos los datos sobre tu
+              biomo/necesidad, y te dirá en solo aquello que necesitas saber
+              así como subir datos nuevos.
+            </p>
+          </a>
+
+          <a href="convocatorias.html" class="service-card">
+            <div class="icon-container">
+              <img src="convocatoria-icon.svg" alt="Convocatorias" class="service-icon" />
+            </div>
+            <h3>Asistente de Convocatorias</h3>
+            <p>
+              Participa en nuevas convocatorias, genera nuevos anteproyectos. Ingresa aquí
+              todos los datos referentes a la nueva formulación de
+              anteproyecto.
+            </p>
+          </a>
+
+          <a href="explorador.html" class="service-card">
+            <div class="icon-container">
+              <img src="explorador-icon.svg" alt="Explorador" class="service-icon" />
+            </div>
+            <h3>Asistente Explorador de Anteproyectos</h3>
+            <p>
+              Interactúa con todas aquellas convocatorias abiertas y formula
+              anteproyectos.
+            </p>
+          </a>
+        </div>        <div class="support-container">
+          <a href="#" class="support-button">
+            <img src="support-icon.svg" alt="Soporte" />
+            Contacta con el soporte
+          </a>
+        </div>
+        </main>
+      </div>
+    </div>    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+    <script src="js/sidebar-loader.js"></script>
+    <script src="js/admin-button.js"></script>
+    <script>
+
+      function decodeJWT(token) {
+        try {
+          const parts = token.split('.');
+          if (parts.length !== 3) {
+            throw new Error('Token invalido');
+          }
+
+          const payload = parts[1];
+          const paddedPayload = payload + '='.repeat((4 - payload.length % 4) % 4);
+          const decodedPayload = atob(paddedPayload);
+          return JSON.parse(decodedPayload);
+        } catch(error) {
+          console.error('Error al decodificar token', error);
+          return null;
+        }
+      }
+
+      async function loadUserName() {
+        try {
+          const token = localStorage.getItem('token');
+          if(!token) {
+            console.log('No se encontro token');
+            window.location.href = 'login.html';
+            return;
+          }
+
+          const payload = decodeJWT(token);
+          if(!payload) {
+            console.error('No se pudo deocidificar el token');
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+            return;
+          }
+
+          console.log('Payload del token:', payload);
+
+          let username = 'us';
+
+          if(payload.nombre) {
+            username = `${payload.nombre}`;
+          }
+
+          await loadUserProfileImage(payload.id, token, username);
+
+          const userMenuSpan = document.querySelector('.user-menu span');
+          if(userMenuSpan) {
+            userMenuSpan.textContent = username;
+            console.log('Nombre de usuario actualizado')
+          }
+          else {
+            console.error('No se encontro el elemento');
+          }
+
+          if(payload.exp) {
+            const currentTime = Math.floor(Date.now() / 1000);
+            if(payload.exp < currentTime) {
+              console.log('Token expirado, redirigiendo a login');
+              localStorage.removeItem('token');
+              window.location.href = 'login.html';
+              return;
+            }
+          }
+        } catch (error) {
+          console.error('Error cargando nombre de usuario:', error);
+          localStorage.removeItem('token');
+          window.location.href = 'login.html';
+        }
+      }
+
+      async function loadUserProfileImage(userId, token, username) {
+        try {
+          if(!userId) {
+            console.log('No se encontro ID de usuario');
+            return;
+          }
+
+          const response =  await fetch(`/Consultas/api/getUserProfileImage/${userId}`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if(!response.ok) {
+            console.log('No se encontro imagen de perfil')
+            return;
+          }
+
+          const data = await response.json();
+
+          if(data.status === 'success' && data.imageName) {
+            const imageUrl = `/uploads/usuarios/${data.imageName}`;
+
+            const avatarImg = document.querySelector('.avatar-circle img');
+            if(avatarImg) {
+              avatarImg.src = imageUrl;
+              avatarImg.alt = `${username} - Perfil`; 
+            } else
+            {
+              console.error('Usuario no tiene imagen');
+            }
+            
+          } else {
+            console.error('Error al obtener imagen de perfil');
+          }
+        } catch (error) {
+          console.log('Error al cargar imagen de perfil:', error);
+        }
+      }
+
+      function logout() {
+        localStorage.removeItem('token');
+        window.location.href = 'login.html';
+      }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        loadUserName();
+      });
+
+      loadUserName();
+    </script>
+  </body>
+</html>

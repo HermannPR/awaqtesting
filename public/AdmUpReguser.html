@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios - MAWI Super Admin</title>
+    <link rel="stylesheet" href="css/admin-styles.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="admin-logo">
+                <div class="admin-logo-icon">M</div>
+                <h1>MAWI Super Admin</h1>
+            </div>
+            <div class="admin-user-menu">
+                <div class="admin-user-info">
+                    <div class="admin-avatar" id="userAvatar">SA</div>
+                    <div>
+                        <div style="font-weight: 600;" id="userName">Super Admin</div>
+                        <div style="font-size: 0.875rem; color: var(--admin-text-secondary);" id="userEmail">admin@mawi.com</div>
+                    </div>
+                </div>
+                <button class="admin-btn admin-btn-secondary admin-btn-sm" onclick="logout()">
+                    <span>🚪</span> Cerrar Sesión
+                </button>
+            </div>
+        </header>        <!-- Navigation -->
+        <nav class="admin-nav">
+            <ul>
+                <li><a href="indexSAdmin.html">
+                    <span>📊</span> Dashboard
+                </a></li>
+                <li><a href="dashboard.html">
+                    <span>🏠</span> Dashboard MAWI
+                </a></li>
+                <li><a href="SAaceptarusuarios.html">
+                    <span>👥</span> Usuarios Pendientes
+                </a></li>
+                <li><a href="AdmUpReguser.html" class="active">
+                    <span>⚙️</span> Gestión de Usuarios
+                </a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="admin-content">
+            <div class="admin-page-header">
+                <h1 class="admin-page-title">Gestión de Usuarios</h1>
+                <p class="admin-page-subtitle">Administra usuarios activos y visualiza sus registros</p>
+            </div>
+
+            <!-- Actions Bar -->
+            <div class="admin-flex admin-items-center admin-justify-between admin-mb-2">
+                <div class="admin-flex admin-items-center admin-gap-2">
+                    <button class="admin-btn admin-btn-primary" onclick="loadUsuarios()">
+                        <span>🔄</span> Actualizar Lista
+                    </button>
+                    <select class="admin-btn admin-btn-secondary" id="statusFilter" onchange="filterUsers()">
+                        <option value="">Todos los estados</option>
+                        <option value="activo">Activos</option>
+                        <option value="inactivo">Inactivos</option>
+                        <option value="suspendido">Suspendidos</option>
+                    </select>
+                </div>
+                <div class="admin-badge admin-badge-info">
+                    <span id="userCount">0</span> usuarios totales
+                </div>
+            </div>
+
+            <!-- Users Table -->
+            <div class="admin-table-container">
+                <table class="admin-table" id="usersTable">
+                    <thead onclick="loadUsuarios()">
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Email</th>
+                            <th>Rol</th>
+                            <th>Estado</th>
+                            <th>Registros</th>
+                            <th>Última Actividad</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-table-body">
+                        <tr>
+                            <td colspan="7" class="admin-loading">
+                                <div class="admin-spinner"></div>
+                                Cargando usuarios...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="admin-card" style="display: none; text-align: center; padding: 3rem;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">👥</div>
+                <h3 style="margin: 0 0 0.5rem 0; color: var(--admin-text-primary);">No se encontraron usuarios</h3>
+                <p style="color: var(--admin-text-secondary); margin: 0;">Ajusta los filtros para ver más resultados</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let userToken = localStorage.getItem('token');
+        let allUsers = [];
+        let filteredUsers = [];
+
+        // Función principal para cargar usuarios
+        async function loadUsuarios() {
+            try {
+                const tbody = document.getElementById('user-table-body');
+                const emptyState = document.getElementById('emptyState');
+                
+                // Mostrar loading
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="admin-loading">
+                            <div class="admin-spinner"></div>
+                            Cargando usuarios...
+                        </td>
+                    </tr>
+                `;
+                emptyState.style.display = 'none';                if (!userToken) {
+                    console.error('No token found in localStorage');
+                    window.location.href = 'login.html';
+                    return;
+                }                const response = await fetch('/Consultas/api/getusers', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                const users = result.records || [];
+                allUsers = users;
+                filteredUsers = users;
+                
+                document.getElementById('userCount').textContent = users.length;
+
+                if (users.length === 0) {
+                    tbody.innerHTML = '';
+                    emptyState.style.display = 'block';
+                    return;
+                }
+
+                displayUsers(users);
+
+            } catch (error) {
+                console.error('Error loading users:', error);
+                document.getElementById('user-table-body').innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; color: var(--admin-danger); padding: 2rem;">
+                            Error al cargar usuarios: ${error.message}
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Función para mostrar usuarios en la tabla
+        function displayUsers(users) {
+            const tbody = document.getElementById('user-table-body');
+            
+            if (users.length === 0) {
+                document.getElementById('emptyState').style.display = 'block';
+                tbody.innerHTML = '';
+                return;
+            }
+
+            document.getElementById('emptyState').style.display = 'none';
+              tbody.innerHTML = users.map(user => `
+                <tr class="expandable-row" onclick="toggleUserDetails(${user.idUsuario})">
+                    <td>
+                        <div class="admin-flex admin-items-center admin-gap-2">
+                            <div class="admin-avatar" style="width: 32px; height: 32px; font-size: 0.875rem;">
+                                ${user.Nombre ? user.Nombre.charAt(0).toUpperCase() : 'U'}
+                            </div>
+                            <div>
+                                <div style="font-weight: 600;">${user.Nombre || 'Sin nombre'} ${user.Apellidos || ''}</div>
+                                <div style="font-size: 0.875rem; color: var(--admin-text-secondary);">ID: ${user.idUsuario}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${user.email || 'Sin email'}</td>
+                    <td>
+                        <span class="admin-badge ${getRoleBadgeClass(user.rol)}">
+                            ${getRoleText(user.rol)}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="admin-badge ${getStatusBadgeClass(user.estado)}">
+                            ${getStatusText(user.estado)}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="admin-stat-value" style="font-size: 1rem;">
+                            ${user.TotalRegistros || 0}
+                        </span>
+                    </td>
+                    <td>
+                        <div style="font-size: 0.875rem;">
+                            Sin actividad
+                        </div>
+                    </td>
+                    <td onclick="event.stopPropagation()">
+                        <div class="admin-flex admin-gap-2">
+                            <button class="admin-btn admin-btn-primary admin-btn-sm" onclick="viewUserDetails(${user.idUsuario})">
+                                👁️ Ver
+                            </button>
+                            <button class="admin-btn admin-btn-secondary admin-btn-sm" onclick="editUser(${user.idUsuario})">
+                                ✏️ Editar
+                            </button>
+                            <button class="admin-btn admin-btn-danger admin-btn-sm" onclick="deleteUser(${user.idUsuario})">
+                                🗑️ Eliminar
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="admin-expandable-content" id="details-${user.idUsuario}">
+                    <td colspan="7">
+                        <div class="admin-expandable-inner">
+                            <div class="admin-expandable-header">
+                                <h4 class="admin-expandable-title">Registros de ${user.Nombre || 'Usuario'} ${user.Apellidos || ''}</h4>
+                                <button class="admin-collapse-btn" onclick="toggleUserDetails(${user.idUsuario})">
+                                    Cerrar
+                                </button>
+                            </div>
+                            <div id="registros-${user.idUsuario}" class="admin-loading">
+                                <div class="admin-spinner"></div>
+                                Cargando registros...
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Función para filtrar usuarios
+        function filterUsers() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            
+            if (statusFilter === '') {
+                filteredUsers = allUsers;
+            } else {
+                filteredUsers = allUsers.filter(user => user.status === statusFilter);
+            }
+            
+            document.getElementById('userCount').textContent = filteredUsers.length;
+            displayUsers(filteredUsers);
+        }
+
+        // Función para alternar detalles del usuario
+        async function toggleUserDetails(userId) {
+            const detailsRow = document.getElementById(`details-${userId}`);
+            const registrosContainer = document.getElementById(`registros-${userId}`);
+            
+            if (detailsRow.classList.contains('show')) {
+                detailsRow.classList.remove('show');
+                return;
+            }
+
+            detailsRow.classList.add('show');
+            
+            // Cargar registros si no se han cargado
+            if (registrosContainer.innerHTML.includes('Cargando registros...')) {
+                try {
+                    const response = await fetch(`/Consultas/api/SAdmin/userregistros/${userId}`, {
+                        headers: {
+                            'Authorization': `Bearer ${userToken}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        const registros = await response.json();
+                        
+                        if (registros.length === 0) {
+                            registrosContainer.innerHTML = `
+                                <div style="text-align: center; color: var(--admin-text-secondary); padding: 1rem;">
+                                    No hay registros disponibles
+                                </div>
+                            `;
+                        } else {
+                            registrosContainer.innerHTML = `
+                                <table class="admin-table" style="margin-top: 0;">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Tipo</th>
+                                            <th>Fecha</th>
+                                            <th>Estado</th>
+                                            <th>Descripción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${registros.map(registro => `
+                                            <tr>
+                                                <td>${registro.id}</td>
+                                                <td>
+                                                    <span class="admin-badge admin-badge-info">
+                                                        ${registro.tipo || 'Sin tipo'}
+                                                    </span>
+                                                </td>
+                                                <td>${registro.fecha ? new Date(registro.fecha).toLocaleDateString('es-ES') : 'Sin fecha'}</td>
+                                                <td>
+                                                    <span class="admin-badge ${getStatusBadgeClass(registro.estado)}">
+                                                        ${registro.estado || 'Sin estado'}
+                                                    </span>
+                                                </td>
+                                                <td>${registro.descripcion || 'Sin descripción'}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            `;
+                        }
+                    } else {
+                        throw new Error('Error al cargar registros');
+                    }
+                } catch (error) {
+                    console.error('Error loading user records:', error);
+                    registrosContainer.innerHTML = `
+                        <div style="text-align: center; color: var(--admin-danger); padding: 1rem;">
+                            Error al cargar registros: ${error.message}
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // Funciones para obtener clases de badges
+        function getStatusBadgeClass(status) {
+            switch (status) {
+                case 'activo': return 'admin-badge-success';
+                case 'inactivo': return 'admin-badge-warning';
+                case 'suspendido': return 'admin-badge-danger';
+                default: return 'admin-badge-info';
+            }
+        }        function getRoleBadgeClass(role) {
+            switch (parseInt(role)) {
+                case 1: return 'admin-badge-info';     // Usuario normal
+                case 2: return 'admin-badge-warning';  // Moderador
+                case 3: return 'admin-badge-success';  // Admin
+                case 4: return 'admin-badge-danger';   // Super Admin
+                default: return 'admin-badge-info';
+            }
+        }
+
+        function getRoleText(role) {
+            switch (parseInt(role)) {
+                case 1: return 'Usuario';
+                case 2: return 'Moderador';
+                case 3: return 'Admin';
+                case 4: return 'Super Admin';
+                default: return 'Sin rol';
+            }
+        }
+
+        function getStatusBadgeClass(status) {
+            switch (status) {
+                case 'A': return 'admin-badge-success';  // Activo
+                case 'I': return 'admin-badge-warning';  // Inactivo
+                case 'S': return 'admin-badge-danger';   // Suspendido
+                default: return 'admin-badge-info';
+            }
+        }
+
+        function getStatusText(status) {
+            switch (status) {
+                case 'A': return 'Activo';
+                case 'I': return 'Inactivo';
+                case 'S': return 'Suspendido';
+                default: return 'Sin estado';
+            }
+        }
+
+        // Funciones de acciones (placeholder)
+        function viewUserDetails(userId) {
+            alert(`Ver detalles del usuario ${userId} - Función en desarrollo`);
+        }
+
+        function editUser(userId) {
+            alert(`Editar usuario ${userId} - Función en desarrollo`);
+        }
+
+        function deleteUser(userId) {
+            if (confirm(`¿Estás seguro de que quieres eliminar el usuario ${userId}?`)) {
+                alert(`Eliminar usuario ${userId} - Función en desarrollo`);
+            }
+        }
+
+        // Función para cerrar sesión
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        }
+
+        // Inicializar página
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!userToken) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            loadUsuarios();
+
+            // Actualizar información del usuario si está disponible
+            const userData = localStorage.getItem('userData');
+            if (userData) {
+                try {
+                    const user = JSON.parse(userData);
+                    if (user.name) {
+                        document.getElementById('userName').textContent = user.name;
+                        document.getElementById('userAvatar').textContent = user.name.charAt(0).toUpperCase();
+                    }
+                    if (user.email) {
+                        document.getElementById('userEmail').textContent = user.email;
+                    }
+                } catch (e) {
+                    console.warn('Error parsing user data:', e);
+                }
+            }        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Asistente Explorador de Anteproyectos - Mawi</title>    <meta name="description" content="Asistente Explorador de Anteproyectos" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="css/sidebar-styles.css" />
+  </head>  <body data-page="explorador">
+    <div class="mawi-app-container">
+      <header class="mawi-header">
+        <div class="logo">
+          <img src="eye-icon.svg" alt="Mawi" class="eye-icon" />
+          <h2>Mawi</h2>
+        </div>
+        
+        <div class="user-menu">
+          <span>Usuario</span>
+          <div class="avatar-circle">
+            <img src="avatar-placeholder.svg" alt="Usuario" />
+          </div>
+          <button onclick="logout()" class="logout-btn" title="Cerrar sesión">
+            🚪
+          </button>
+        </div>
+      </header>      <!-- Botón toggle de la sidebar -->
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Abrir/cerrar menú lateral">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9,18 15,12 9,6"></polyline>
+        </svg>
+      </button>
+
+      <div class="app-content with-sidebar">
+        <!-- Contenedor para la sidebar -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main content -->
+        <main class="main-content">
+          <div class="biomo-header">
+            <h1>Asistente Explorador de Anteproyectos</h1>
+          </div>
+
+          <div class="explorador-tabs">
+            <div class="tabs">
+              <button class="tab-btn active">Abiertos</button>
+              <button class="tab-btn">Cerrados</button>
+            </div>
+          </div>
+
+          <div class="projects-container">
+            <!-- Proyecto 1 -->
+            <div class="project-card">
+              <div class="project-content">
+                <h3 class="project-title">Título</h3>
+                <p class="project-description">Descripción</p>
+                <div class="project-dates">
+                  <span class="date-label">Fecha de creación: </span>
+                  <span class="date">00/00/0000</span>
+                  <span class="date-label">Fecha límite: </span>
+                  <span class="date">00/00/0000</span>
+                </div>
+              </div>
+              <div class="project-action">
+                <button class="circle-btn">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 5V19M5 12H19" stroke="#30a046" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Proyecto 2 -->
+            <div class="project-card">
+              <div class="project-content">
+                <h3 class="project-title">Título</h3>
+                <p class="project-description">Descripción</p>
+                <div class="project-dates">
+                  <span class="date-label">Fecha de creación: </span>
+                  <span class="date">00/00/0000</span>
+                  <span class="date-label">Fecha límite: </span>
+                  <span class="date">00/00/0000</span>
+                </div>
+              </div>
+              <div class="project-action">
+                <button class="circle-btn">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 5V19M5 12H19" stroke="#30a046" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="create-project">
+            <button class="action-button">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M12 5V19M5 12H19" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Crear Nuevo Anteproyecto
+            </button>
+          </div>
+
+          <div class="chat-container">
+            <div class="chat-input-container">
+              <input 
+                type="text" 
+                class="chat-input" 
+                placeholder="Escribe..." 
+              />
+              <button class="send-button">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+    <script src="js/sidebar-loader.js"></script>
+    <script src="js/admin-button.js"></script>
+  </body>
+    <script>
+
+      function decodeJWT(token) {
+        try {
+          const parts = token.split('.');
+          if (parts.length !== 3) {
+            throw new Error('Token invalido');
+          }
+
+          const payload = parts[1];
+          const paddedPayload = payload + '='.repeat((4 - payload.length % 4) % 4);
+          const decodedPayload = atob(paddedPayload);
+          return JSON.parse(decodedPayload);
+        } catch(error) {
+          console.error('Error al decodificar token', error);
+          return null;
+        }
+      }
+
+      async function loadUserName() {
+        try {
+          const token = localStorage.getItem('token');
+          if(!token) {
+            console.log('No se encontro token');
+            window.location.href = 'login.html';
+            return;
+          }
+
+          const payload = decodeJWT(token);
+          if(!payload) {
+            console.error('No se pudo deocidificar el token');
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+            return;
+          }
+
+          console.log('Payload del token:', payload);
+
+          let username = 'us';
+
+          if(payload.nombre) {
+            username = `${payload.nombre}`;
+          }
+
+          await loadUserProfileImage(payload.id, token, username);
+
+          const userMenuSpan = document.querySelector('.user-menu span');
+          if(userMenuSpan) {
+            userMenuSpan.textContent = username;
+            console.log('Nombre de usuario actualizado')
+          }
+          else {
+            console.error('No se encontro el elemento');
+          }
+
+          if(payload.exp) {
+            const currentTime = Math.floor(Date.now() / 1000);
+            if(payload.exp < currentTime) {
+              console.log('Token expirado, redirigiendo a login');
+              localStorage.removeItem('token');
+              window.location.href = 'login.html';
+              return;
+            }
+          }
+        } catch (error) {
+          console.error('Error cargando nombre de usuario:', error);
+          localStorage.removeItem('token');
+          window.location.href = 'login.html';
+        }
+      }
+
+      async function loadUserProfileImage(userId, token, username) {
+        try {
+          if(!userId) {
+            console.log('No se encontro ID de usuario');
+            return;
+          }
+
+          const response =  await fetch(`/Consultas/api/getUserProfileImage/${userId}`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if(!response.ok) {
+            console.log('No se encontro imagen de perfil')
+            return;
+          }
+
+          const data = await response.json();
+
+          if(data.status === 'success' && data.imageName) {
+            const imageUrl = `/uploads/usuarios/${data.imageName}`;
+
+            const avatarImg = document.querySelector('.avatar-circle img');
+            if(avatarImg) {
+              avatarImg.src = imageUrl;
+              avatarImg.alt = `${username} - Perfil`; 
+            } else
+            {
+              console.error('Usuario no tiene imagen');
+            }
+            
+          } else {
+            console.error('Error al obtener imagen de perfil');
+          }
+        } catch (error) {
+          console.log('Error al cargar imagen de perfil:', error);
+        }
+      }
+
+      function logout() {
+        localStorage.removeItem('token');
+        window.location.href = 'login.html';
+      }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        loadUserName();
+      });
+
+      loadUserName();
+    </script>
+</html>

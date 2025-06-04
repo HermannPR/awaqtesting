@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Asistente de Mi Biomo - Mawi</title>    <meta name="description" content="Asistente de Mi Biomo" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="css/sidebar-styles.css" />
+  </head>
+  <body data-page="biomo">
+    <div class="mawi-app-container">
+      <header class="mawi-header">
+        <div class="logo">
+          <img src="eye-icon.svg" alt="Mawi" class="eye-icon" />
+          <h2>Mawi</h2>
+        </div>
+        <div class="user-menu">
+          <span>Usuario</span>
+          <div class="avatar-circle">
+            <img src="avatar-placeholder.svg" alt="Usuario" />
+          </div>
+          <button onclick="logout()" class="logout-btn" title="Cerrar sesión">
+            🚪
+          </button>
+        </div>
+      </header>      <!-- Botón toggle de la sidebar -->
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Abrir/cerrar menú lateral">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9,18 15,12 9,6"></polyline>
+        </svg>
+      </button>
+
+      <div class="app-content with-sidebar">
+        <!-- Contenedor para la sidebar -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main content -->
+        <main class="main-content">
+          <div class="back-button">
+            <a href="dashboard.html">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                <path d="M15 18L9 12L15 6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </a>
+          </div>
+          
+          <div class="biomo-header">
+            <h1>Asistente de Mi Biomo</h1>
+            <p class="biomo-id">Biomo ID: 1234</p>
+            
+            <div class="biomo-actions">
+              <button class="action-button">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M12 5V19M5 12H19" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Subir Datos
+              </button>
+              
+              <button class="action-button">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M14 3H20V9M14 3L9 8M20 9L9 20M9 20H3V14M9 20L4 15M3 14L8 9M8 9L14 3" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                Generar PDF
+              </button>
+            </div>
+          </div>
+
+          <div class="chat-container">
+            <div class="chat-messages">
+              <!-- Los mensajes irán aquí -->
+              <div class="message bot-message">
+                <p>Hola, soy tu asistente de Biomo. ¿En qué puedo ayudarte hoy?</p>
+              </div>
+              
+              <div class="message user-message">
+                <p>Necesito información sobre mi Biomo actual.</p>
+              </div>
+              
+              <div class="message bot-message">
+                <p>Claro, tu Biomo ID: 1234 presenta las siguientes características...</p>
+                <p>Puedes subir nuevos datos o generar un PDF con la información actual.</p>
+              </div>
+            </div>
+            
+            <div class="chat-input-container">
+              <input 
+                type="text" 
+                class="chat-input" 
+                placeholder="Escribe..." 
+              />
+              <button class="send-button">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                  <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9L22 2" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+    <script src="js/sidebar-loader.js"></script>
+    <script src="js/admin-button.js"></script>
+    
+    <script>
+    // Chat functionality for Biomo
+    (function() {
+        'use strict';
+
+        const chatInput = document.querySelector('.chat-input');
+        const sendButton = document.querySelector('.send-button');
+        const chatMessages = document.querySelector('.chat-messages');
+
+        // Configuration
+        const AI_CONFIG = {
+            endpoint: '/Consultas/api/ai-chat', // Corregido para coincidir con el backend
+            systemPrompt: `Eres un asistente especializado en biodiversidad y ecosistemas (Biomo). 
+            Ayudas a los usuarios a entender y analizar su información de biodiversidad. 
+            Responde de manera clara, técnica pero accesible, y siempre enfócate en temas relacionados con:
+            - Biodiversidad
+            - Ecosistemas
+            - Conservación
+            - Análisis de datos ambientales
+            - Proyectos de investigación en biodiversidad`
+        };
+
+        let conversationHistory = [];
+
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            
+            const messageP = document.createElement('p');
+            messageP.textContent = content;
+            messageDiv.appendChild(messageP);
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message bot-message typing-indicator';
+            typingDiv.innerHTML = '<p>Escribiendo...</p>';
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return typingDiv;
+        }
+
+        async function sendMessage(message) {
+            if (!message.trim()) return;
+
+            // Add user message
+            addMessage(message, true);
+            conversationHistory.push({ role: 'user', content: message });
+
+            // Show typing indicator
+            const typingIndicator = showTypingIndicator();
+
+            try {
+                const response = await fetch(AI_CONFIG.endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        messages: conversationHistory,
+                        systemPrompt: AI_CONFIG.systemPrompt
+                    })
+                });
+
+                // Remove typing indicator
+                typingIndicator.remove();
+
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.success && data.response) {
+                    addMessage(data.response, false);
+                    conversationHistory.push({ role: 'assistant', content: data.response });
+                } else {
+                    throw new Error(data.error || 'Error desconocido');
+                }
+
+            } catch (error) {
+                console.error('Error sending message:', error);
+                typingIndicator.remove();
+                addMessage('Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo.', false);
+            }
+        }
+
+        function handleSend() {
+            const message = chatInput.value.trim();
+            if (message) {
+                sendMessage(message);
+                chatInput.value = '';
+            }
+        }
+
+        // Event listeners
+        sendButton.addEventListener('click', handleSend);
+        
+        chatInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleSend();
+            }
+        });
+
+        // Focus on input when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            chatInput.focus();
+        });
+
+        console.log('🌿 Biomo Chat initialized');
+    })();
+    </script>
+        <script>
+
+      function decodeJWT(token) {
+        try {
+          const parts = token.split('.');
+          if (parts.length !== 3) {
+            throw new Error('Token invalido');
+          }
+
+          const payload = parts[1];
+          const paddedPayload = payload + '='.repeat((4 - payload.length % 4) % 4);
+          const decodedPayload = atob(paddedPayload);
+          return JSON.parse(decodedPayload);
+        } catch(error) {
+          console.error('Error al decodificar token', error);
+          return null;
+        }
+      }
+
+      async function loadUserName() {
+        try {
+          const token = localStorage.getItem('token');
+          if(!token) {
+            console.log('No se encontro token');
+            window.location.href = 'login.html';
+            return;
+          }
+
+          const payload = decodeJWT(token);
+          if(!payload) {
+            console.error('No se pudo deocidificar el token');
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+            return;
+          }
+
+          console.log('Payload del token:', payload);
+
+          let username = 'us';
+
+          if(payload.nombre) {
+            username = `${payload.nombre}`;
+          }
+
+          await loadUserProfileImage(payload.id, token, username);
+
+          const userMenuSpan = document.querySelector('.user-menu span');
+          if(userMenuSpan) {
+            userMenuSpan.textContent = username;
+            console.log('Nombre de usuario actualizado')
+          }
+          else {
+            console.error('No se encontro el elemento');
+          }
+
+          if(payload.exp) {
+            const currentTime = Math.floor(Date.now() / 1000);
+            if(payload.exp < currentTime) {
+              console.log('Token expirado, redirigiendo a login');
+              localStorage.removeItem('token');
+              window.location.href = 'login.html';
+              return;
+            }
+          }
+        } catch (error) {
+          console.error('Error cargando nombre de usuario:', error);
+          localStorage.removeItem('token');
+          window.location.href = 'login.html';
+        }
+      }
+
+      async function loadUserProfileImage(userId, token, username) {
+        try {
+          if(!userId) {
+            console.log('No se encontro ID de usuario');
+            return;
+          }
+
+          const response =  await fetch(`/Consultas/api/getUserProfileImage/${userId}`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if(!response.ok) {
+            console.log('No se encontro imagen de perfil')
+            return;
+          }
+
+          const data = await response.json();
+
+          if(data.status === 'success' && data.imageName) {
+            const imageUrl = `/uploads/usuarios/${data.imageName}`;
+
+            const avatarImg = document.querySelector('.avatar-circle img');
+            if(avatarImg) {
+              avatarImg.src = imageUrl;
+              avatarImg.alt = `${username} - Perfil`; 
+            } else
+            {
+              console.error('Usuario no tiene imagen');
+            }
+            
+          } else {
+            console.error('Error al obtener imagen de perfil');
+          }
+        } catch (error) {
+          console.log('Error al cargar imagen de perfil:', error);
+        }
+      }
+
+      function logout() {
+        localStorage.removeItem('token');
+        window.location.href = 'login.html';
+      }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        loadUserName();
+      });
+
+      loadUserName();
+    </script>
+  </body>
+</html>

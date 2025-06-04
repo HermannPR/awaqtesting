@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Usuarios Pendientes - MAWI Super Admin</title>
+    <link rel="stylesheet" href="css/admin-styles.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="admin-logo">
+                <div class="admin-logo-icon">M</div>
+                <h1>MAWI Super Admin</h1>
+            </div>
+            <div class="admin-user-menu">
+                <div class="admin-user-info">
+                    <div class="admin-avatar" id="userAvatar">SA</div>
+                    <div>
+                        <div style="font-weight: 600;" id="userName">Super Admin</div>
+                        <div style="font-size: 0.875rem; color: var(--admin-text-secondary);" id="userEmail">admin@mawi.com</div>
+                    </div>
+                </div>
+                <button class="admin-btn admin-btn-secondary admin-btn-sm" onclick="logout()">
+                    <span>🚪</span> Cerrar Sesión
+                </button>
+            </div>
+        </header>        <!-- Navigation -->
+        <nav class="admin-nav">
+            <ul>
+                <li><a href="indexSAdmin.html">
+                    <span>📊</span> Dashboard
+                </a></li>
+                <li><a href="dashboard.html">
+                    <span>🏠</span> Dashboard MAWI
+                </a></li>
+                <li><a href="SAaceptarusuarios.html" class="active">
+                    <span>👥</span> Usuarios Pendientes
+                </a></li>
+                <li><a href="AdmUpReguser.html">
+                    <span>⚙️</span> Gestión de Usuarios
+                </a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="admin-content">
+            <div class="admin-page-header">
+                <h1 class="admin-page-title">Usuarios Pendientes de Aprobación</h1>
+                <p class="admin-page-subtitle">Revisa y aprueba nuevos usuarios registrados en el sistema</p>
+            </div>
+
+            <!-- Actions Bar -->
+            <div class="admin-flex admin-items-center admin-justify-between admin-mb-2">
+                <div class="admin-flex admin-items-center admin-gap-2">
+                    <button class="admin-btn admin-btn-primary" onclick="loadPendingUsers()">
+                        <span>🔄</span> Actualizar Lista
+                    </button>
+                    <button class="admin-btn admin-btn-success" onclick="approveAllVisible()" id="approveAllBtn" style="display: none;">
+                        <span>✅</span> Aprobar Todos Visibles
+                    </button>
+                </div>
+                <div class="admin-badge admin-badge-info">
+                    <span id="pendingCount">0</span> usuarios pendientes
+                </div>
+            </div>
+
+            <!-- Users Table -->
+            <div class="admin-table-container">
+                <table class="admin-table" id="usersTable">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Email</th>
+                            <th>Rol</th>
+                            <th>Fecha Registro</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <tr>
+                            <td colspan="6" class="admin-loading">
+                                <div class="admin-spinner"></div>
+                                Cargando usuarios pendientes...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="admin-card" style="display: none; text-align: center; padding: 3rem;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">👥</div>
+                <h3 style="margin: 0 0 0.5rem 0; color: var(--admin-text-primary);">No hay usuarios pendientes</h3>
+                <p style="color: var(--admin-text-secondary); margin: 0;">Todos los usuarios han sido procesados</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        console.log('🚀 Iniciando página SAaceptarusuarios.html');
+        
+        // Variables globales
+        let userToken = localStorage.getItem('token');
+        let pendingUsers = [];
+
+        // Función para verificar autenticación
+        function checkAuth() {
+            if (!userToken) {
+                console.log('❌ No hay token, redirigiendo a login');
+                window.location.href = 'login.html';
+                return false;
+            }
+            return true;
+        }
+
+        // Función principal para cargar usuarios pendientes
+        async function loadPendingUsers() {
+            console.log('📋 Cargando usuarios pendientes...');
+            
+            if (!checkAuth()) return;
+
+            try {
+                const tbody = document.getElementById('usersTableBody');
+                const emptyState = document.getElementById('emptyState');
+                const approveAllBtn = document.getElementById('approveAllBtn');
+                
+                if (!tbody) {
+                    console.error('❌ No se encontró elemento usersTableBody');
+                    return;
+                }
+                
+                // Mostrar loading
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="admin-loading">
+                            <div class="admin-spinner"></div>
+                            Cargando usuarios pendientes...
+                        </td>
+                    </tr>
+                `;
+                
+                if (emptyState) emptyState.style.display = 'none';
+
+                console.log('🌐 Realizando petición a /Consultas/api/getUsersNA');
+                const response = await fetch('/Consultas/api/getUsersNA', {
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                console.log('📡 Respuesta recibida:', response.status);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('📊 Datos recibidos:', data);
+                
+                pendingUsers = data.records || [];
+                
+                const countElement = document.getElementById('pendingCount');
+                if (countElement) {
+                    countElement.textContent = pendingUsers.length;
+                }
+
+                if (pendingUsers.length === 0) {
+                    tbody.innerHTML = '';
+                    if (emptyState) emptyState.style.display = 'block';
+                    if (approveAllBtn) approveAllBtn.style.display = 'none';
+                    console.log('ℹ️ No hay usuarios pendientes');
+                    return;
+                }
+
+                // Mostrar usuarios
+                tbody.innerHTML = pendingUsers.map(user => `
+                    <tr id="user-${user.idUsuario}">
+                        <td>
+                            <div class="admin-flex admin-items-center admin-gap-2">
+                                <div class="admin-avatar" style="width: 32px; height: 32px; font-size: 0.875rem;">
+                                    ${user.Nombre ? user.Nombre.charAt(0).toUpperCase() : 'U'}
+                                </div>
+                                <div>
+                                    <div style="font-weight: 600;">${user.Nombre || 'Sin nombre'} ${user.Apellidos || ''}</div>
+                                    <div style="font-size: 0.875rem; color: var(--admin-text-secondary);">ID: ${user.idUsuario}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${user.email || 'Sin email'}</td>
+                        <td>
+                            <span class="admin-badge admin-badge-info">
+                                ${getRoleText(user.rol)}
+                            </span>
+                        </td>
+                        <td>
+                            <div style="font-size: 0.875rem;">
+                                ${user.fechaRegistro ? new Date(user.fechaRegistro).toLocaleDateString('es-ES') : 'Sin fecha'}
+                            </div>
+                        </td>
+                        <td>
+                            <span class="admin-badge admin-badge-warning">
+                                ${getStatusText(user.estado)}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="admin-flex admin-gap-2">
+                                <button class="admin-btn admin-btn-success admin-btn-sm" onclick="approveUser(${user.idUsuario})">
+                                    ✅ Aprobar
+                                </button>
+                                <button class="admin-btn admin-btn-danger admin-btn-sm" onclick="rejectUser(${user.idUsuario})">
+                                    ❌ Rechazar
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+
+                if (approveAllBtn) approveAllBtn.style.display = 'inline-flex';
+                console.log(`✅ ${pendingUsers.length} usuarios cargados exitosamente`);
+
+            } catch (error) {
+                console.error('❌ Error loading pending users:', error);
+                const tbody = document.getElementById('usersTableBody');
+                if (tbody) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: var(--admin-danger); padding: 2rem;">
+                                Error al cargar usuarios: ${error.message}
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+        }
+
+        // Función para aprobar usuario
+        async function approveUser(userId) {
+            console.log(`👍 Aprobando usuario ${userId}`);
+            
+            if (!confirm('¿Estás seguro de que quieres aprobar este usuario?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/Consultas/api/aceptarUsuario/${userId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                console.log('📡 Respuesta de aprobación:', response.status);
+
+                if (response.ok) {
+                    // Remover usuario de la tabla
+                    const userRow = document.getElementById(`user-${userId}`);
+                    if (userRow) {
+                        userRow.style.background = 'rgba(16, 185, 129, 0.1)';
+                        setTimeout(() => {
+                            userRow.remove();
+                            // Actualizar contador
+                            const remaining = document.querySelectorAll('#usersTableBody tr[id^="user-"]').length;
+                            const countElement = document.getElementById('pendingCount');
+                            if (countElement) {
+                                countElement.textContent = remaining;
+                            }
+                            
+                            if (remaining === 0) {
+                                const emptyState = document.getElementById('emptyState');
+                                const approveAllBtn = document.getElementById('approveAllBtn');
+                                if (emptyState) emptyState.style.display = 'block';
+                                if (approveAllBtn) approveAllBtn.style.display = 'none';
+                            }
+                        }, 500);
+                    }
+                    
+                    console.log(`✅ Usuario ${userId} aprobado exitosamente`);
+                    alert('Usuario aprobado exitosamente');
+                } else {
+                    throw new Error('Error en la respuesta del servidor');
+                }
+            } catch (error) {
+                console.error('❌ Error approving user:', error);
+                alert('Error al aprobar usuario. Inténtalo de nuevo.');
+            }
+        }        // Función para rechazar usuario
+        async function rejectUser(userId) {
+            console.log(`👎 Rechazando usuario ${userId}`);
+            
+            if (!confirm('¿Estás seguro de que quieres rechazar este usuario?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/Consultas/api/rechazarUsuario/${userId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                console.log('📡 Respuesta de rechazo:', response.status);
+
+                if (response.ok) {
+                    // Remover usuario de la tabla
+                    const userRow = document.getElementById(`user-${userId}`);
+                    if (userRow) {
+                        userRow.style.background = 'rgba(239, 68, 68, 0.1)';
+                        setTimeout(() => {
+                            userRow.remove();
+                            // Actualizar contador
+                            const remaining = document.querySelectorAll('#usersTableBody tr[id^="user-"]').length;
+                            const countElement = document.getElementById('pendingCount');
+                            if (countElement) {
+                                countElement.textContent = remaining;
+                            }
+                            
+                            if (remaining === 0) {
+                                const emptyState = document.getElementById('emptyState');
+                                const approveAllBtn = document.getElementById('approveAllBtn');
+                                if (emptyState) emptyState.style.display = 'block';
+                                if (approveAllBtn) approveAllBtn.style.display = 'none';
+                            }
+                        }, 500);
+                    }
+                    
+                    console.log(`✅ Usuario ${userId} rechazado exitosamente`);
+                    alert('Usuario rechazado exitosamente');
+                } else {
+                    throw new Error('Error en la respuesta del servidor');
+                }
+            } catch (error) {
+                console.error('❌ Error rejecting user:', error);
+                alert('Error al rechazar usuario. Inténtalo de nuevo.');
+            }
+        }
+
+        // Función para aprobar todos los usuarios visibles
+        async function approveAllVisible() {
+            if (!confirm('¿Estás seguro de que quieres aprobar todos los usuarios pendientes?')) {
+                return;
+            }
+
+            const userRows = document.querySelectorAll('#usersTableBody tr[id^="user-"]');
+            console.log(`📦 Aprobando ${userRows.length} usuarios en lote`);
+            
+            for (let row of userRows) {
+                const userId = row.id.split('-')[1];
+                await approveUser(parseInt(userId));
+                // Pequeña pausa entre aprobaciones
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+        }
+
+        // Funciones auxiliares
+        function getRoleText(role) {
+            switch (parseInt(role)) {
+                case 1: return 'Usuario';
+                case 2: return 'Biomonitor';
+                case 3: return 'Administrador';
+                case 4: return 'Super Admin';
+                default: return 'Sin rol';
+            }
+        }
+
+        function getStatusText(status) {
+            switch (status) {
+                case 'A': return 'Activo';
+                case 'P': return 'Pendiente';
+                case 'I': return 'Inactivo';
+                default: return 'Desconocido';
+            }
+        }
+
+        // Función para cerrar sesión
+        function logout() {
+            console.log('🚪 Cerrando sesión');
+            localStorage.removeItem('token');
+            localStorage.removeItem('userData');
+            window.location.href = 'login.html';
+        }
+
+        // Inicialización cuando el DOM está listo
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎯 DOM cargado, inicializando página');
+            
+            if (!checkAuth()) {
+                return;
+            }
+
+            // Cargar usuarios pendientes automáticamente
+            loadPendingUsers();
+
+            // Actualizar información del usuario si está disponible
+            const userData = localStorage.getItem('userData');
+            if (userData) {
+                try {
+                    const user = JSON.parse(userData);
+                    const userNameElement = document.getElementById('userName');
+                    const userAvatarElement = document.getElementById('userAvatar');
+                    const userEmailElement = document.getElementById('userEmail');
+                    
+                    if (user.name && userNameElement) {
+                        userNameElement.textContent = user.name;
+                    }
+                    if (user.name && userAvatarElement) {
+                        userAvatarElement.textContent = user.name.charAt(0).toUpperCase();
+                    }
+                    if (user.email && userEmailElement) {
+                        userEmailElement.textContent = user.email;
+                    }
+                } catch (e) {
+                    console.warn('⚠️ Error parsing user data:', e);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Información de ubicación - Mawi</title>
+    <meta name="description" content="Información de ubicación en Mawi" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="mawi-auth-container">
+      <div class="mawi-auth-card">
+        <h1>Trabajo u Organización</h1>
+        <p class="subtitle">Completa tu usuario agregando esta información</p>
+
+        <form id="userOrgForm">
+          <div class="form-group">
+            <label for="Nombre Organizacion">Nombre Organizacion</label>
+            <input
+              id="Norg"
+              type="text"
+              placeholder="Escribe el nombre de tu Organizacion"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="Descripcion Organizacion">Descripción de Organizacion</label>
+            <input
+              id="Dorg"
+              type="text"
+              placeholder="Escribe una breve descripción de tu Organizacion"
+              required
+            />
+          </div>
+
+          <button type="submit" class="mawi-button with-icon" id="next-btn">
+           <span>Terminar</span>
+          </button>
+        </form>
+
+        <div class="help-text">
+          <p>
+            ¿Necesitas ayuda? <a href="#" class="mawi-link">Contacta con nosotros</a>
+          </p>
+        </div>
+      </div>
+    </div>
+    <!-- Keep the GPT Engineer script tag -->
+    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+    <script>
+    document.getElementById('userOrgForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        localStorage.setItem('user-organization', JSON.stringify({
+            Norg: document.getElementById('Norg').value,
+            Dorg: document.getElementById('Dorg').value
+        }));
+
+        const signupData = JSON.parse(localStorage.getItem('signupData'));
+        const profileImage = JSON.parse(localStorage.getItem('profile-image'));
+        const userLocation = JSON.parse(localStorage.getItem('user-location'));
+        const userOrg = JSON.parse(localStorage.getItem('user-organization'));
+        const userData = {
+            Nombre:signupData.nombre,
+            Apellidos:signupData.apellidos,
+            email:signupData.email,
+            password:signupData.password,
+            pais:userLocation.country,
+            numerotel:userLocation.phone,
+            region:userLocation.region,
+            ciudad:userLocation.city,
+            nombreOrganizacion:userOrg.Norg,
+            descOrganizacion:userOrg.Dorg,
+            rol:2,
+            estado:'P',
+            idResponsable:null,
+            imagen: profileImage?.image ? {
+            name: profileImage.name,
+            base64: profileImage.image
+            } : null
+        };
+
+        const response = await fetch('/Consultas/api/insertUser', {
+            method: 'POST',
+            headers: {'Content-Type' : 'application/json'},
+            body: JSON.stringify(userData)
+        });
+
+        const data = await response.json();
+        if(data.status === "success") {
+            alert('Usuario registrado! espera la confirmacion por correo electronico');
+            localStorage.removeItem('signupData');
+            localStorage.removeItem('profile-image');
+            localStorage.removeItem('user-location');
+            localStorage.removeItem('user-organization');
+            window.location.href = 'login.html';
+        } else {
+            alert('Error al registrar el usuario: ' + data.message);
+        }
+    });
+    </script>
+  </body>
+</html>

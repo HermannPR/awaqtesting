@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Super Admin - MAWI</title>
+    <link rel="stylesheet" href="css/admin-styles.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="admin-logo">
+                <div class="admin-logo-icon">M</div>
+                <h1>MAWI Super Admin</h1>
+            </div>
+            <div class="admin-user-menu">
+                <div class="admin-user-info">
+                    <div class="admin-avatar" id="userAvatar">SA</div>
+                    <div>
+                        <div style="font-weight: 600;" id="userName">Super Admin</div>
+                        <div style="font-size: 0.875rem; color: var(--admin-text-secondary);" id="userEmail">admin@mawi.com</div>
+                    </div>
+                </div>
+                <button class="admin-btn admin-btn-secondary admin-btn-sm" onclick="logout()">
+                    <span>🚪</span> Cerrar Sesión
+                </button>
+            </div>
+        </header>        <!-- Navigation -->
+        <nav class="admin-nav">
+            <ul>
+                <li><a href="indexSAdmin.html" class="active">
+                    <span>📊</span> Dashboard
+                </a></li>
+                <li><a href="dashboard.html">
+                    <span>🏠</span> Dashboard MAWI
+                </a></li>
+                <li><a href="SAaceptarusuarios.html">
+                    <span>👥</span> Usuarios Pendientes
+                </a></li>
+                <li><a href="AdmUpReguser.html">
+                    <span>⚙️</span> Gestión de Usuarios
+                </a></li>
+            </ul>
+        </nav>        <!-- Main Content -->
+        <main class="admin-content">
+            <div class="admin-page-header">
+                <h1 class="admin-page-title">Panel de Control Super Admin</h1>
+                <p class="admin-page-subtitle">Administra usuarios, permisos y configuraciones del sistema MAWI</p>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="admin-cards-grid">
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <div class="admin-card-icon" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: white;">
+                            👥
+                        </div>
+                        <h3 class="admin-card-title">Usuarios Pendientes</h3>
+                    </div>
+                    <p class="admin-card-description">Usuarios registrados esperando aprobación</p>
+                    <div class="admin-card-stats">
+                        <div class="admin-stat">
+                            <span class="admin-stat-value" id="pendingUsersCount">-</span>
+                            <span class="admin-stat-label">Pendientes</span>
+                        </div>
+                        <a href="SAaceptarusuarios.html" class="admin-btn admin-btn-primary admin-btn-sm">
+                            Ver Todos
+                        </a>
+                    </div>
+                </div>
+
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <div class="admin-card-icon" style="background: linear-gradient(135deg, #10b981, #059669); color: white;">
+                            ✅
+                        </div>
+                        <h3 class="admin-card-title">Usuarios Activos</h3>
+                    </div>
+                    <p class="admin-card-description">Usuarios aprobados y activos en el sistema</p>
+                    <div class="admin-card-stats">
+                        <div class="admin-stat">
+                            <span class="admin-stat-value" id="activeUsersCount">-</span>
+                            <span class="admin-stat-label">Activos</span>
+                        </div>
+                        <a href="AdmUpReguser.html" class="admin-btn admin-btn-primary admin-btn-sm">
+                            Gestionar
+                        </a>
+                    </div>
+                </div>
+
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <div class="admin-card-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: white;">
+                            📋
+                        </div>
+                        <h3 class="admin-card-title">Total Registros</h3>
+                    </div>
+                    <p class="admin-card-description">Cantidad total de registros en el sistema</p>
+                    <div class="admin-card-stats">
+                        <div class="admin-stat">
+                            <span class="admin-stat-value" id="totalRecordsCount">-</span>
+                            <span class="admin-stat-label">Registros</span>
+                        </div>
+                        <button class="admin-btn admin-btn-primary admin-btn-sm" onclick="refreshStats()">
+                            🔄 Actualizar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="admin-card">
+                    <div class="admin-card-header">
+                        <div class="admin-card-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white;">
+                            ⚙️
+                        </div>
+                        <h3 class="admin-card-title">Configuración</h3>
+                    </div>
+                    <p class="admin-card-description">Acceso rápido a configuraciones del sistema</p>
+                    <div class="admin-card-stats">
+                        <div class="admin-flex admin-gap-2">
+                            <button class="admin-btn admin-btn-secondary admin-btn-sm" onclick="exportData()">
+                                📤 Exportar
+                            </button>
+                            <button class="admin-btn admin-btn-secondary admin-btn-sm" onclick="viewLogs()">
+                                📝 Logs
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>    <script>
+        // Variables globales
+        let userToken = localStorage.getItem('token');
+        
+        // Función para cargar estadísticas
+        async function loadStatistics() {
+            try {
+                if (!userToken) {
+                    console.error('No token found');
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Cargar usuarios pendientes
+                const pendingResponse = await fetch('/Consultas/api/SAdmin/listpendientes', {
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (pendingResponse.ok) {
+                    const pendingData = await pendingResponse.json();
+                    document.getElementById('pendingUsersCount').textContent = pendingData.length || 0;
+                }
+
+                // Cargar usuarios activos
+                const usersResponse = await fetch('/Consultas/api/SAdmin/listusers', {
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (usersResponse.ok) {
+                    const usersData = await usersResponse.json();
+                    const activeUsers = usersData.filter(user => user.status === 'activo');
+                    document.getElementById('activeUsersCount').textContent = activeUsers.length || 0;
+                    
+                    // Calcular total de registros
+                    const totalRecords = usersData.reduce((sum, user) => sum + (user.totalRegistros || 0), 0);
+                    document.getElementById('totalRecordsCount').textContent = totalRecords || 0;
+                }
+
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+                document.getElementById('pendingUsersCount').textContent = 'Error';
+                document.getElementById('activeUsersCount').textContent = 'Error';
+                document.getElementById('totalRecordsCount').textContent = 'Error';
+            }
+        }
+
+        // Función para actualizar estadísticas
+        function refreshStats() {
+            document.getElementById('pendingUsersCount').textContent = '-';
+            document.getElementById('activeUsersCount').textContent = '-';
+            document.getElementById('totalRecordsCount').textContent = '-';
+            loadStatistics();
+        }
+
+        // Función para cerrar sesión
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        }
+
+        // Funciones placeholder para acciones rápidas
+        function exportData() {
+            alert('Función de exportación en desarrollo');
+        }
+
+        function viewLogs() {
+            alert('Visor de logs en desarrollo');
+        }
+
+        function generateReport() {
+            alert('Generador de reportes en desarrollo');
+        }
+
+        function systemMaintenance() {
+            alert('Panel de mantenimiento en desarrollo');
+        }
+
+        // Inicializar página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar autenticación
+            if (!userToken) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Cargar estadísticas
+            loadStatistics();
+
+            // Actualizar información del usuario si está disponible
+            const userData = localStorage.getItem('userData');
+            if (userData) {
+                try {
+                    const user = JSON.parse(userData);
+                    if (user.name) {
+                        document.getElementById('userName').textContent = user.name;
+                        document.getElementById('userAvatar').textContent = user.name.charAt(0).toUpperCase();
+                    }
+                    if (user.email) {
+                        document.getElementById('userEmail').textContent = user.email;
+                    }
+                } catch (e) {
+                    console.warn('Error parsing user data:', e);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

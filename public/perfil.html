@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />    <title>Mi Perfil - Mawi</title>
+    <meta name="description" content="Mi Perfil en Mawi" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="css/sidebar-styles.css" />
+  </head>
+  <body data-page="perfil">
+    <div class="mawi-app-container">      <header class="mawi-header">
+        <div class="logo">
+          <img src="eye-icon.svg" alt="Mawi" class="eye-icon" />
+          <h2>Mawi</h2>
+        </div>
+        
+        <div class="user-menu">
+          <span>Usuario</span>
+          <div class="avatar-circle">
+            <img src="avatar-placeholder.svg" alt="Usuario" />
+          </div>
+          <button onclick="logout()" class="logout-btn" title="Cerrar sesión">
+            🚪
+          </button>
+        </div>
+      </header>      <!-- Botón toggle de la sidebar -->
+      <button class="sidebar-toggle" id="sidebarToggle" aria-label="Abrir/cerrar menú lateral">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="9,18 15,12 9,6"></polyline>
+        </svg>
+      </button>
+
+      <div class="app-content with-sidebar">
+        <!-- Contenedor para la sidebar -->
+        <div id="sidebar-container"></div>
+
+        <!-- Main content -->
+        <main class="main-content">
+          <div class="biomo-header">
+            <h1>Mi Perfil</h1>
+            <p class="biomo-id">Gestiona tu información personal y configuración de cuenta</p>
+          </div>
+
+          <div class="perfil-form">
+            <!-- Profile Picture Section -->
+            <div class="profile-section">
+              <div class="profile-picture-container">
+                <div class="profile-picture" id="profile-picture">
+                  <img src="avatar-placeholder.svg" alt="Foto de perfil" id="profile-img">
+                  <div class="profile-overlay" onclick="changeProfilePicture()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                      <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke="white" stroke-width="2"/>
+                      <circle cx="12" cy="13" r="4" stroke="white" stroke-width="2"/>
+                    </svg>
+                    <span>Cambiar foto</span>
+                  </div>
+                </div>
+                <input type="file" id="profile-upload" accept="image/*" style="display: none;">
+              </div>
+              
+              <div class="profile-status">
+                <h3>Usuario Activo</h3>
+
+              </div>
+            </div>
+
+            <form id="profile-form">
+              <!-- Personal Information -->
+              <div class="form-section">
+                <h2 class="section-title">
+                  <span class="section-icon">👤</span>
+                  Información Personal
+                </h2>
+                
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="nombre">Nombre*</label>
+                    <input 
+                      type="text" 
+                      id="nombre"
+                      class="form-input" 
+                      placeholder="Tu nombre"
+                      required
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="apellidos">Apellidos*</label>
+                    <input 
+                      type="text" 
+                      id="apellidos"
+                      class="form-input" 
+                      placeholder="Tus apellidos"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="email">Correo electrónico*</label>
+                    <input 
+                      type="email" 
+                      id="email"
+                      class="form-input" 
+                      placeholder="tu@email.com"
+                      required
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="telefono">Teléfono</label>
+                    <input 
+                      type="tel" 
+                      id="telefono"
+                      class="form-input" 
+                      placeholder="+52 81 1234 5678"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Security Section -->
+              <div class="form-section">
+                <h2 class="section-title">
+                  <span class="section-icon">🔒</span>
+                  Seguridad
+                </h2>
+                
+                <div class="form-group">
+                  <label for="current-password">Contraseña actual</label>
+                  <input 
+                    type="password" 
+                    id="current-password"
+                    class="form-input" 
+                    placeholder="Contraseña actual"
+                  />
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="new-password">Nueva contraseña</label>
+                    <input 
+                      type="password" 
+                      id="new-password"
+                      class="form-input" 
+                      placeholder="Nueva contraseña"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="confirm-password">Confirmar contraseña</label>
+                    <input 
+                      type="password" 
+                      id="confirm-password"
+                      class="form-input" 
+                      placeholder="Confirmar nueva contraseña"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Location Information -->
+              <div class="form-section">
+                <h2 class="section-title">
+                  <span class="section-icon">📍</span>
+                  Ubicación
+                </h2>
+                
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="pais">País*</label>
+                    <select id="pais" class="form-input" required>
+                      <option value="MX" selected>México</option>
+                      <option value="CO">Colombia</option>
+                      <option value="CR">Costa Rica</option>
+                      <option value="GT">Guatemala</option>
+                      <option value="PE">Perú</option>
+                      <option value="EC">Ecuador</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="ciudad">Ciudad*</label>
+                    <input 
+                      type="text" 
+                      id="ciudad"
+                      class="form-input" 
+                      placeholder="Tu ciudad"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="region">Región/Estado</label>
+                  <input 
+                    type="text" 
+                    id="region"
+                    class="form-input" 
+                    placeholder="Región o estado"
+                  />
+                </div>
+              </div>
+
+              <!-- Organization Information -->
+              <div class="form-section">
+                <h2 class="section-title">
+                  <span class="section-icon">🏢</span>
+                  Información Profesional
+                </h2>
+                
+                <div class="form-group">
+                  <label for="org-nombre">Organización*</label>
+                  <input 
+                    type="text" 
+                    id="org-nombre"
+                    class="form-input" 
+                    placeholder="Nombre de tu organización"
+                    required
+                  />
+                </div>
+                
+                <div class="form-group">
+                  <label for="org-descripcion">Descripción de la organización</label>
+                  <input
+                    id="org-descripcion"
+                    class="form-input" 
+                    placeholder="Describe brevemente tu organización y sus actividades"
+                    rows="4"
+                  />
+                </div>
+              </div>
+
+              <div class="action-buttons">
+                <button type="submit" class="action-button primary">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  Guardar Cambios
+                </button>
+                
+                <button type="button" class="action-button" onclick="resetForm()">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M3 12a9 9 0 019-9 9.75 9.75 0 016.74 2.74L21 8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M21 3v5h-5M21 12a9 9 0 01-9 9 9.75 9.75 0 01-6.74-2.74L3 16" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M8 16l-5 5v-5h5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  Restablecer
+                </button>
+                
+                <button type="button" class="action-button danger" onclick="deleteAccount()">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <polyline points="3,6 5,6 21,6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  Eliminar Cuenta
+                </button>
+              </div>
+            </form>
+
+            <div class="support-container">
+              <a href="#" class="support-button">
+                <img src="support-icon.svg" alt="Soporte" />
+                ¿Necesitas ayuda con tu perfil?
+              </a>
+            </div>
+          </div>        </main>
+      </div>
+    </div>    <script src="js/sidebar-loader.js"></script>
+    <script src="js/admin-button.js"></script>
+    <script>
+      function changeProfilePicture() {
+        document.getElementById('profile-upload').click();
+      }
+
+      function handleProfileUpload(event) {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const profileImg = document.getElementById('profile-img');
+            profileImg.src = e.target.result;
+            showNotification('📸 Foto de perfil actualizada', 'success');
+          };
+          reader.readAsDataURL(file);
+        }
+      }
+
+      async function saveProfile(event) {
+        event.preventDefault();
+        
+      const token = localStorage.getItem('token');
+        if (!token) {
+          alert('Por favor, inicia sesión para guardar los cambios.');
+          return;
+        }
+
+        const payload = decodeJWT(token);
+        if(!payload) {
+          window.location.href = 'login.html';
+          return;
+        }
+
+        const formData = {
+          Nombre: document.getElementById('nombre').value.trim(),
+          Apellidos: document.getElementById('apellidos').value.trim(),
+          email: document.getElementById('email').value.trim(),
+          numerotel: document.getElementById('telefono').value.trim(),
+          pais: document.getElementById('pais').value,
+          ciudad: document.getElementById('ciudad').value.trim(),
+          region: document.getElementById('region').value.trim(),
+          nombreOrganizacion: document.getElementById('org-nombre').value.trim(),
+          descOrganizacion: document.getElementById('org-descripcion').value.trim()
+        }
+
+        if(!formData.Nombre || !formData.Apellidos || !formData.email || !formData.ciudad || !formData.nombreOrganizacion) {
+          showNotification('❗ Todos los campos obligatorios deben ser completados', 'error');
+          return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+          showNotification('⚠️ Por favor, ingresa un email válido.', 'error');
+          return;
+        }
+        const currentPassword = document.getElementById('current-password').value;
+        const newPassword = document.getElementById('new-password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+
+        if (newPassword || confirmPassword) {
+          if (!currentPassword) {
+            showNotification('⚠️ Ingresa tu contraseña actual para cambiarla', 'error');
+            return;
+          }
+    
+          if (newPassword !== confirmPassword) {
+            showNotification('⚠️ Las contraseñas nuevas no coinciden', 'error');
+            return;
+          }
+    
+          if (newPassword.length < 6) {
+            showNotification('⚠️ La nueva contraseña debe tener al menos 6 caracteres', 'error');
+            return;
+          }
+          formData.currentPassword = currentPassword;
+          formData.newPassword = newPassword;
+        }
+
+        try {
+          const response = await fetch('/Consultas/api/updateUser', {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+          });
+
+          const data = await response.json();
+
+          if(response.ok && data.status === 'success') {
+            showNotification('✅ Cambios guardados correctamente', 'success');
+            document.getElementById('current-password').value = '';
+            document.getElementById('new-password').value = '';
+            document.getElementById('confirm-password').value = '';
+          }
+          else {
+            showNotification(`❌ Error al guardar los cambios: ${data.message || 'Error desconocido'}`, 'error');
+            return;
+          }
+        } catch(error) {
+          console.error('Error al guardar los cambios:', error);
+          showNotification('❌ Error al guardar los cambios. Inténtalo de nuevo más tarde.', 'error');
+          return;
+        }
+      }
+
+      function resetForm() {
+        if (confirm('¿Estás seguro de que quieres restablecer todos los cambios?')) {
+          document.getElementById('profile-form').reset();
+          showNotification('🔄 Formulario restablecido', 'info');
+        }
+      }
+
+      function deleteAccount() {
+        const confirmed = confirm('⚠️ ADVERTENCIA: Esta acción eliminará permanentemente tu cuenta y todos tus datos. ¿Estás absolutamente seguro?');
+        
+        if (confirmed) {
+          const doubleConfirm = prompt('Para confirmar, escribe "ELIMINAR" en mayúsculas:');
+          
+          if (doubleConfirm === 'ELIMINAR') {
+            showNotification('🗑️ Procesando eliminación de cuenta...', 'error');
+            
+            setTimeout(() => {
+              alert('Tu cuenta ha sido marcada para eliminación. Recibirás un email de confirmación final.');
+            }, 2000);
+          } else {
+            showNotification('❌ Eliminación cancelada', 'info');
+          }
+        }
+      }
+
+      function showNotification(message, type) {
+        // Remove existing notifications
+        const existingNotifications = document.querySelectorAll('.notification');
+        existingNotifications.forEach(n => n.remove());
+        
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = message;
+        notification.style.cssText = `
+          position: fixed;
+          top: 80px;
+          right: 20px;
+          padding: 16px 24px;
+          border-radius: 8px;
+          color: white;
+          font-weight: 500;
+          z-index: 1000;
+          transform: translateX(100%);
+          transition: transform 0.3s ease;
+          max-width: 400px;
+          word-wrap: break-word;
+        `;
+        
+        // Set colors based on type
+        const colors = {
+          success: '#30a046',
+          error: '#ff4444',
+          info: '#007bff'
+        };
+        notification.style.backgroundColor = colors[type] || colors.info;
+        
+        document.body.appendChild(notification);
+        
+        // Animate in
+        setTimeout(() => {
+          notification.style.transform = 'translateX(0)';
+        }, 100);
+        
+        // Remove after 4 seconds
+        setTimeout(() => {
+          notification.style.transform = 'translateX(100%)';
+          setTimeout(() => {
+            if (notification.parentNode) {
+              notification.parentNode.removeChild(notification);
+            }
+          }, 300);
+        }, 4000);
+      }
+
+      // Initialize
+      document.addEventListener('DOMContentLoaded', function() {
+        // Add event listeners
+        document.getElementById('profile-upload').addEventListener('change', handleProfileUpload);
+        document.getElementById('profile-form').addEventListener('submit', saveProfile);
+      });
+    </script>
+
+    <style>
+      /* Additional styles for profile page */
+      .profile-section {
+        display: flex;
+        gap: 32px;
+        margin-bottom: 32px;
+        padding: 24px;
+        background-color: #333;
+        border-radius: 12px;
+        align-items: center;
+      }
+
+      .profile-picture-container {
+        flex-shrink: 0;
+      }
+
+      .profile-picture {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+        border: 4px solid #30a046;
+      }
+
+      .profile-picture img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .profile-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        color: white;
+        font-size: 0.8rem;
+        gap: 4px;
+      }
+
+      .profile-picture:hover .profile-overlay {
+        opacity: 1;
+      }
+
+      .profile-status h3 {
+        margin: 0 0 8px 0;
+        color: #30a046;
+      }
+
+      .profile-status p {
+        margin: 0 0 16px 0;
+        color: #aaa;
+      }
+
+      .profile-stats {
+        display: flex;
+        gap: 24px;
+      }
+
+      .stat {
+        text-align: center;
+      }
+
+      .stat-number {
+        display: block;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #30a046;
+      }
+
+      .stat-label {
+        display: block;
+        font-size: 0.8rem;
+        color: #aaa;
+      }
+
+      .form-section {
+        margin-bottom: 32px;
+        padding: 24px;
+        background-color: #333;
+        border-radius: 12px;
+      }
+
+      .section-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 24px 0;
+        color: #e0e0e0;
+        font-size: 1.2rem;
+        border-bottom: 2px solid #444;
+        padding-bottom: 12px;
+      }
+
+      .section-icon {
+        font-size: 1.4rem;
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 0;
+      }
+
+      .form-row .form-group {
+        margin-bottom: 20px;
+      }
+
+      .notification-options {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .notification-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 16px;
+        background-color: #444;
+        border-radius: 8px;
+      }
+
+      .notification-item input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        margin-top: 2px;
+        accent-color: #30a046;
+      }
+
+      .notification-item label {
+        font-weight: 600;
+        color: #e0e0e0;
+        margin-bottom: 4px;
+        cursor: pointer;
+      }
+
+      .notification-item p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #aaa;
+        line-height: 1.4;
+      }
+
+      .action-button.danger {
+        background-color: #dc3545;
+      }
+
+      .action-button.danger:hover {
+        background-color: #c82333;
+      }
+
+      @media (max-width: 768px) {
+        .profile-section {
+          flex-direction: column;
+          text-align: center;
+        }
+        
+        .profile-stats {
+          justify-content: center;
+        }
+        
+        .form-row {
+          grid-template-columns: 1fr;
+          gap: 0;
+        }
+        
+        .action-buttons {
+          flex-direction: column;
+        }
+        
+        .action-button {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+    </style>
+        <script>
+
+      function decodeJWT(token) {
+        try {
+          const parts = token.split('.');
+          if (parts.length !== 3) {
+            throw new Error('Token invalido');
+          }
+
+          const payload = parts[1];
+          const paddedPayload = payload + '='.repeat((4 - payload.length % 4) % 4);
+          const decodedPayload = atob(paddedPayload);
+          return JSON.parse(decodedPayload);
+        } catch(error) {
+          console.error('Error al decodificar token', error);
+          return null;
+        }
+      }
+      async function loadAll(){
+        try{
+          const token = localStorage.getItem('token');
+          if(!token) {
+            window.location.href = 'login.html';
+            return;
+          }
+
+          const payload = decodeJWT(token);
+          if(!payload) {
+            console.error('No se pudo deocidificar el token');
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+            return;
+          }
+
+          let idUsuario = payload.id;
+          const response = await fetch(`/Consultas/api/findUser/${idUsuario}`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if(!response.ok) {
+            console.log('No se encontro imagen de perfil')
+            return;
+          }
+          const data = await response.json();
+          if(data.status === 'success' && data.user) {
+            const user = data.user;
+
+            document.getElementById('nombre').value = user.Nombre;
+            document.getElementById('apellidos').value = user.Apellidos;
+            document.getElementById('email').value = user.email;
+            document.getElementById('telefono').value = user.numerotel;
+            document.getElementById('pais').value = user.pais;
+            document.getElementById('ciudad').value = user.ciudad;
+            document.getElementById('region').value = user.region;
+            document.getElementById('org-nombre').value = user.nombreOrganizacion;
+            document.getElementById('org-descripcion').value = user.descOrganizacion;
+          }
+        } catch (error) {
+          console.error('Error cargando datos del usuario:', error);
+        }
+      }
+
+
+
+      async function loadUserName() {
+        try {
+          const token = localStorage.getItem('token');
+          if(!token) {
+            console.log('No se encontro token');
+            window.location.href = 'login.html';
+            return;
+          }
+
+          const payload = decodeJWT(token);
+          if(!payload) {
+            console.error('No se pudo deocidificar el token');
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+            return;
+          }
+
+          console.log('Payload del token:', payload);
+
+          let username = 'us';
+
+          if(payload.nombre) {
+            username = `${payload.nombre}`;
+          }
+
+          await loadUserProfileImage(payload.id, token, username);
+
+          const userMenuSpan = document.querySelector('.user-menu span');
+          if(userMenuSpan) {
+            userMenuSpan.textContent = username;
+            console.log('Nombre de usuario actualizado')
+          }
+          else {
+            console.error('No se encontro el elemento');
+          }
+
+          if(payload.exp) {
+            const currentTime = Math.floor(Date.now() / 1000);
+            if(payload.exp < currentTime) {
+              console.log('Token expirado, redirigiendo a login');
+              localStorage.removeItem('token');
+              window.location.href = 'login.html';
+              return;
+            }
+          }
+        } catch (error) {
+          console.error('Error cargando nombre de usuario:', error);
+          localStorage.removeItem('token');
+          window.location.href = 'login.html';
+        }
+      }
+
+      async function loadUserProfileImage(userId, token, username) {
+        try {
+          if(!userId) {
+            console.log('No se encontro ID de usuario');
+            return;
+          }
+
+          const response =  await fetch(`/Consultas/api/getUserProfileImage/${userId}`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            }
+          });
+
+          if(!response.ok) {
+            console.log('No se encontro imagen de perfil')
+            return;
+          }
+
+          const data = await response.json();
+
+          if(data.status === 'success' && data.imageName) {
+            const imageUrl = `/uploads/usuarios/${data.imageName}`;
+
+            const avatarImg = document.querySelector('.avatar-circle img');
+            if(avatarImg) {
+              avatarImg.src = imageUrl;
+              avatarImg.alt = `${username} - Perfil`; 
+            } 
+            const profileImg = document.getElementById('profile-img');
+            if(profileImg) {
+              profileImg.src = imageUrl;
+              profileImg.alt = `${username} - Foto de perfil`;
+
+            } else {
+              console.error('No se encontro el elemento de imagen de perfil');
+            }
+            
+          } else {
+            console.error('Error al obtener imagen de perfil');
+          }
+        } catch (error) {
+          console.log('Error al cargar imagen de perfil:', error);
+        }
+      }
+
+      function logout() {
+        localStorage.removeItem('token');
+        window.location.href = 'login.html';
+      }
+
+      document.addEventListener('DOMContentLoaded', function() {
+        loadUserName();
+        loadAll();
+      });
+    </script>
+  </body>
+</html>
+

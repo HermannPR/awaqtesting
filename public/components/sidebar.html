@@ -1,0 +1,62 @@
+<!-- Sidebar Component - Incluir en todas las páginas que lo necesiten -->
+<aside class="sidebar" id="sidebar">
+  <nav class="sidebar-nav">
+    <a href="dashboard.html" class="sidebar-item" data-page="dashboard">
+      <span class="sidebar-icon">🏠</span>
+      <span class="sidebar-text">Inicio</span>
+    </a>
+    <a href="biomo.html" class="sidebar-item" data-page="biomo">
+      <span class="sidebar-icon">🌿</span>
+      <span class="sidebar-text">Asistente de Mi Biomo</span>
+    </a>
+    <a href="explorador.html" class="sidebar-item" data-page="explorador">
+      <span class="sidebar-icon">📄</span>
+      <span class="sidebar-text">Asistente Explorador de Anteproyectos</span>
+    </a>
+    <a href="convocatorias.html" class="sidebar-item" data-page="convocatorias">
+      <span class="sidebar-icon">📋</span>
+      <span class="sidebar-text">Asistente de Convocatorias</span>
+    </a>
+    <a href="perfil.html" class="sidebar-item" data-page="perfil">
+      <span class="sidebar-icon">👤</span>
+      <span class="sidebar-text">Mi Perfil</span>
+    </a>
+  </nav>
+  
+  <div class="sidebar-footer">
+    <a href="#" class="support-link">
+      <img src="support-icon.svg" alt="Soporte" />
+      <span class="sidebar-text">Contacta con el soporte</span>
+    </a>
+  </div>
+</aside>
+
+<script>
+// Script para manejar la sidebar
+(function() {
+  'use strict';
+
+  // Función para marcar el elemento activo en la sidebar
+  function setActiveMenuItem() {
+    const currentPage = document.body.getAttribute('data-page');
+    if (!currentPage) return;
+
+    // Remover clase active de todos los elementos
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+      item.classList.remove('active');
+    });
+
+    // Agregar clase active al elemento correspondiente
+    const activeItem = document.querySelector(`.sidebar-item[data-page="${currentPage}"]`);
+    if (activeItem) {
+      activeItem.classList.add('active');
+    }
+  }
+
+  // Inicializar cuando el DOM esté listo
+  document.addEventListener('DOMContentLoaded', function() {
+    setActiveMenuItem();
+  });
+
+})();
+</script>

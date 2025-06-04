@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Iniciar sesión - Mawi</title>
+    <meta name="description" content="Iniciar sesión en Mawi" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="mawi-auth-container">
+      <div class="mawi-auth-card">
+        <h1>Iniciar sesión</h1>
+        <p class="link-text">
+          <a href="signup.html" class="mawi-link">¿Crear cuenta?</a>
+        </p>
+
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="email">Correo electrónico</label>
+            <input
+              id="email"
+              type="email"
+              placeholder="Escribe tu correo"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="password">Contraseña</label>
+            <input
+              id="password"
+              type="password"
+              placeholder="Escribe tu contraseña"
+              required
+            />
+            <div class="forgot-password">
+              <a href="recover-password.html" class="mawi-link">¿Has olvidado tu contraseña?</a>
+            </div>
+          </div>
+
+          <button type="submit" class="mawi-button" id="loginBtn">
+            Iniciar sesión
+          </button>
+        </form>
+
+        <div class="help-text">
+          <p>
+            ¿Necesitas ayuda? <a href="#" class="mawi-link">Contacta con nosotros</a>
+          </p>
+        </div>
+        
+        <div class="nav-link">
+          <a href="index.html" class="mawi-link">Volver al inicio</a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      document.getElementById('loginForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const loginBtn = document.getElementById('loginBtn');
+
+        // Deshabilitar botón durante el login
+        loginBtn.disabled = true;
+        loginBtn.textContent = 'Iniciando sesión...';
+
+        try {
+          const response = await fetch('/Consultas/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+          });
+
+          const data = await response.json();
+          
+          if (response.ok && data.token) {
+            const payload = JSON.parse(atob(data.token.split('.')[1]));
+            const rol = data.rol;
+            const estado = data.estado;
+            const nombre = payload.nombre;
+
+            // Verificar si el usuario está activo
+            if (estado !== 'A') {
+              alert('Usuario inactivo, espera la activación de tu cuenta por correo electrónico.');
+              return;
+            }
+
+            // Guardar token
+            localStorage.setItem('token', data.token);
+
+            // Redirigir según el rol
+            switch (rol) {
+              case 1: // Usuario básico
+                window.location.href = 'dashboard.html';
+                break;
+                
+              case 2: // Líder - puede usar dashboard normal o dashboard-lider
+                window.location.href = 'dashboard.html';
+                break;
+                
+              case 3: // Administrador
+                window.location.href = 'indexAdmin.html';
+                break;
+                
+              case 4: // Super Administrador
+                window.location.href = 'indexSAdmin.html';
+                break;
+                
+              default:
+                window.location.href = 'dashboard.html';
+            }
+
+            // Mostrar mensaje de bienvenida
+            alert('Bienvenido ' + (nombre || 'Usuario'));
+            
+          } else {
+            alert('Credenciales incorrectas. Verifica tu email y contraseña.');
+          }
+        } catch (error) {
+          console.error('Error en login:', error);
+          alert('Error al conectar con el servidor. Inténtalo nuevamente.');
+        } finally {
+          // Rehabilitar botón
+          loginBtn.disabled = false;
+          loginBtn.textContent = 'Iniciar sesión';
+        }
+      });
+    </script>
+    
+    <!-- Keep the GPT Engineer script tag -->
+    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+  </body>
+</html>
