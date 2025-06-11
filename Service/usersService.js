@@ -96,20 +96,26 @@ async function insertUser(user){
                 idImagen = qResultImg.getGenId();
             }
         }
+        else
+        {
+            let imageObj = {
+                base64: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==",
+                name: "default.jpg",
+                usuario_carga: idUser
+            };
+            let qResultImg = await imageService.uploadedImageLog(imageObj);
+            if (qResultImg && qResultImg.getStatus()) {
+                idImagen = qResultImg.getGenId();
+            }
+        }
         let query2 = "UPDATE usuario SET idImagen = ? WHERE idUsuario = ?";
         let params2 = [idImagen, idUser];
         await dataSource.updateData(query2, params2);
-        /***/
-        return {
-            status: "success",
-            idUser,
-            idImagen
-        };        
-    }catch(err){
-        return{
-            status: "error",
-            message: err.message
-        }
+        return new dataSource.QueryResult(true, [idUser, idImagen],1, qResult.getGenId());
+    }
+    catch(err){
+        console.error('Error al insertar usuario:', err.message);
+        return new dataSource.QueryResult(false, [], 0, 0, err.message);
     }
 }
 
@@ -120,25 +126,19 @@ async function insertUser(user){
 async function updateUser(user, idUsuario){
     let qResult;
     try{
-        let query = "UPDATE usuario SET Nombre = ?, Apellidos = ?, email = ?, password = ?, pais = ?, numerotel = ?, region = ?, ciudad = ?, nombreOrganizacion = ?, descOrganizacion = ?, rol = ?, estado = ?, idResponsable = ? WHERE idUsuario = ?";
-        const salt = hashService.getSalt();
-        const hash = await hashService.encryptPassword(user.password, salt);
-        const hash_password = salt + hash;
+        let query = "UPDATE usuario SET Nombre = ?, Apellidos = ?, email = ?, password = ?, pais = ?, numerotel = ?, region = ?, ciudad = ?, nombreOrganizacion = ?, descOrganizacion = ? WHERE idUsuario = ?";
 
         let params = [
             user.Nombre,
             user.Apellidos,
             user.email,
-            hash_password,
+            user.password,
             user.pais,
             user.numerotel,
             user.region,
             user.ciudad,
             user.nombreOrganizacion,
             user.descOrganizacion,
-            user.rol,
-            user.estado,
-            user.idResponsable,
             idUsuario
         ];
         qResult = await dataSource.updateData(query, params);

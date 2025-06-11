@@ -143,7 +143,7 @@
                 }
 
                 // Cargar usuarios pendientes
-                const pendingResponse = await fetch('/Consultas/api/SAdmin/listpendientes', {
+                const pendingResponse = await fetch('/Consultas/api/listpendientes', {
                     headers: {
                         'Authorization': `Bearer ${userToken}`,
                         'Content-Type': 'application/json'
@@ -152,11 +152,11 @@
 
                 if (pendingResponse.ok) {
                     const pendingData = await pendingResponse.json();
-                    document.getElementById('pendingUsersCount').textContent = pendingData.length || 0;
+                    document.getElementById('pendingUsersCount').textContent = pendingData.count || 0;
                 }
 
                 // Cargar usuarios activos
-                const usersResponse = await fetch('/Consultas/api/SAdmin/listusers', {
+                const usersResponse = await fetch('/Consultas/api/usuariosActivos', {
                     headers: {
                         'Authorization': `Bearer ${userToken}`,
                         'Content-Type': 'application/json'
@@ -165,12 +165,20 @@
 
                 if (usersResponse.ok) {
                     const usersData = await usersResponse.json();
-                    const activeUsers = usersData.filter(user => user.status === 'activo');
-                    document.getElementById('activeUsersCount').textContent = activeUsers.length || 0;
-                    
-                    // Calcular total de registros
-                    const totalRecords = usersData.reduce((sum, user) => sum + (user.totalRegistros || 0), 0);
-                    document.getElementById('totalRecordsCount').textContent = totalRecords || 0;
+                    document.getElementById('activeUsersCount').textContent = usersData.count || 0;  
+                }
+                // Calcular total de registros
+                const totalRecords = await fetch('/Consultas/api/totalRegistros', {
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                if( totalRecords.ok) {
+                    const totalRecordsData = await totalRecords.json();
+                    document.getElementById('totalRecordsCount').textContent = totalRecordsData.count || 0;
+                } else {
+                    document.getElementById('totalRecordsCount').textContent = 'Error';
                 }
 
             } catch (error) {

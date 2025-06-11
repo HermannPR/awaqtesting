@@ -188,4 +188,77 @@ async function RechazarUsuario(idUsuario)
     return qResult;
 }
 
-module.exports = {getRegistros, getRegistrosPorUsuario, updateRegistro, getUsersNoAceptados, AceptarUsuario, RechazarUsuario};
+async function AceptarUsuariosAll()
+{
+    let qResult;
+    try
+    {
+        let query = "UPDATE usuario SET estaado = ? WHERE estado = ?";
+        let params = ['A', 'P'];
+        qResult = await dataSource.updateData(query, params);
+    } catch(err)
+    {
+        qResult = new dataSource.QueryResult(false, [], 0, 0, err.message);
+    }
+    return qResult;
+}
+
+async function getPendientes() {
+    let qResult;
+    try {
+        let query = "SELECT count(*) as total FROM usuario WHERE estado = ?";
+        let params = ['P'];
+        qResult = await dataSource.getDataWithParams(query, params);
+    } catch(err) {
+        qResult = new dataSource.QueryResult(false, [], 0, 0, err.message);
+    }
+    return qResult;
+}
+
+async function usuariosActivos() {
+    let qResult;
+    try {
+        let query = "SELECT count(*) as total FROM usuario WHERE estado = ?";
+        let params = ['A'];
+        qResult = await dataSource.getDataWithParams(query, params);
+    } catch(err) {
+        qResult = new dataSource.QueryResult(false, [], 0, 0, err.message);
+    }
+    return qResult;
+}
+
+async function totalRegistros() {
+    let qResult;
+    try {
+        let query = "SELECT count(*) as total FROM formularioInicial";
+        qResult = await dataSource.getData(query);
+    } catch(err) {
+        qResult = new dataSource.QueryResult(false, [], 0, 0, err.message);
+    }
+    return qResult;
+}
+
+async function usuariosInactivos() {
+    let qResult;
+    try {
+        let query = "SELECT count(*) as total FROM usuario WHERE estado = ?";
+        let params = ['I'];
+        qResult = await dataSource.getDataWithParams(query, params);
+    } catch(err) {
+        qResult = new dataSource.QueryResult(false, [], 0, 0, err.message);
+    }
+    return qResult;
+}
+
+
+module.exports = {getRegistros,
+     getRegistrosPorUsuario, 
+     updateRegistro, 
+     getUsersNoAceptados, 
+     AceptarUsuario, 
+     RechazarUsuario, 
+     AceptarUsuariosAll,
+     getPendientes,
+     usuariosActivos,
+     totalRegistros,
+     usuariosInactivos};

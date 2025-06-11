@@ -33,7 +33,7 @@ async function isValidUser(username, password){
     let user = qResult.rows[0];
     if(user){
         const salt = user.password.substring(0 , SALT_SIZE);
-        const hash = await encryptPassword(password, salt);
+        const hash = encryptPassword(password, salt);
         const expectedpassword = salt + hash;
 
         if(user.password === expectedpassword){
@@ -43,4 +43,16 @@ async function isValidUser(username, password){
     return null;
 }
 
-module.exports = {encryptPassword, isValidUser, getSalt};
+function comparePassword(plainPassword, hashedPassword) {
+    try {
+        const salt = hashedPassword.substring(0, SALT_SIZE);
+        const hash = encryptPassword(plainPassword, salt);
+        const expectedPassword = salt + hash;
+        return hashedPassword === expectedPassword;
+    } catch (error) {
+        console.error('Error comparing passwords:', error);
+        return false;
+    }
+}
+
+module.exports = {encryptPassword, isValidUser, getSalt, comparePassword};

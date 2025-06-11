@@ -205,42 +205,52 @@ async function updateUser(req, res)
             return res.status(401).json({message: "Unauthorized"});
         }
         const userData = req.body;
-        if(userData.currentPassword && userData.newPassword) {
-            const currentUserResult = await userService.findUser(userId);
+        const currentUserResult = await userService.findUser(userId);
+        if(!currentUserResult.getStatus() || currentUserResult.getRows().length === 0) {
+            return res.status(404).json({
+                status: 'error',
+                message: 'Usuario no encontrado'
+            });
+        }
+        const currentUser = currentUserResult.getRows()[0];
+
+        if(userData.currentPassword && userData.newPassword) 
+        {
             if(!currentUserResult.getStatus() || currentUserResult.getRows().length === 0) {
                 return res.status(404).json({
                     status: 'error',
                     message: 'Usuario no encontrado'
-            });
+                });
+            }
+
+            const isValidPassword = hashService.comparePassword(userData.currentPassword, currentUser.password);
+            if(!isValidPassword) {
+                return res.status(400).json({
+                    status: 'error',
+                    message: 'Contraseña actual incorrecta'
+                });
+            }
+            const salt = hashService.getSalt();
+            userData.password = hashService.encryptPassword(userData.newPassword, salt);
+        } else 
+        {
+            userData.password = currentUser.password;
         }
-
-        const currentUser = currentUserResult.getRows()[0];
-
-        const isValidPassword = await  hashService.comparePassword(userData.currentPassword, currentUser.password);
-        if(!isValidPassword) {
-            return res.status(400).json({
-                status: 'error',
-                message: 'Contraseña actual incorrecta'
-            });
-        }
-
-        userData.password = userService.hashPassword(userData.newPassword);
         delete userData.currentPassword;
         delete userData.newPassword;
-    }
 
-    const result = await userService.updateUser(userData, userId);
-    if(result.getStatus()){
-        return res.status(200).json({
-            "status" : "success",
-            "message" : "Usuario actualizado correctamente"
-        });
-    } else {
-        return res.status(400).json({
-            status: "error",
-            message: "No se pudo actualizar el usuario"
-        });
-    }
+        const result = await userService.updateUser(userData, userId);
+        if(result.getStatus()){
+            return res.status(200).json({
+                "status" : "success",
+                "message" : "Usuario actualizado correctamente"
+            });
+        } else {
+            return res.status(400).json({
+                status: "error",
+                message: "No se pudo actualizar el usuario"
+            });
+        }
     } catch(error)
     {
         let jsonError = {

@@ -43,6 +43,11 @@ router.get(constants.contextURL + constants.apiURL + "/getRegistros/:idUsuario",
 router.get(constants.contextURL + constants.apiURL + "/getUsersNA", usersRest.authenticateTokenSAdmin, adminRest.getUsersNoAceptados);
 router.post(constants.contextURL + constants.apiURL + "/aceptarUsuario/:idUsuario", usersRest.authenticateTokenSAdmin, adminRest.AceptarUsuario);
 router.post(constants.contextURL + constants.apiURL + "/rechazarUsuario/:idUsuario", usersRest.authenticateTokenSAdmin, adminRest.RechazarUsuario);
+router.post(constants.contextURL + constants.apiURL + "/aceptarUsuariosAll", usersRest.authenticateTokenSAdmin, adminRest.AceptarUsuariosAll);
+router.get(constants.contextURL + constants.apiURL + "/listpendientes", usersRest.authenticateTokenSAdmin, adminRest.getPendientes);
+router.get(constants.contextURL + constants.apiURL + "/usuariosActivos", usersRest.authenticateTokenSAdmin, adminRest.usuariosActivos);
+router.get(constants.contextURL + constants.apiURL + "/totalRegistros", usersRest.authenticateTokenSAdmin, adminRest.totalRegistros);
+router.get(constants.contextURL + constants.apiURL + "/usuariosInactivos", usersRest.authenticateTokenSAdmin, adminRest.usuariosInactivos);
 
 // AI Chat routes
 router.post(constants.contextURL + constants.apiURL + "/ai-chat", aiChatRest.aiChat);

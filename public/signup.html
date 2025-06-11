@@ -33,6 +33,8 @@
               id="lastName"
               type="text"
               placeholder="Escribe tus apellidos"
+              pattern="[A-Za-zÀ-ÿ\s]+"
+              title="Solo se permiten letras y espacios"
               required
             />
           </div>
@@ -44,6 +46,7 @@
               type="email"
               placeholder="Escribe tu correo"
               required
+              maxlength="100"
             />
           </div>
 
@@ -54,6 +57,9 @@
               type="password"
               placeholder="Escribe una contraseña"
               required
+              minlength="6"
+              maxlength="50"
+              
             />
           </div>
 

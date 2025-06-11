@@ -177,5 +177,101 @@ async function RechazarUsuario(req, res)
         return res.status(500).json(jsonError);
     }
 }
+/**
+ * @param {*} req 
+ * @param {*} res 
+ */
+async function AceptarUsuariosAll(req, res)
+{
+    try
+    {
+        const result = await SAService.AceptarUsuariosAll();
+        return res.status(200).json({
+            "status" : "success",
+            "total" : result.changes,
+            "records" : result.data
+        });
+    } catch(error)
+    {
+        let jsonError = {
+            "status" : "error",
+            "message" : error.message
+        }
+        console.log(error);
+        return res.status(500).json(jsonError);
+    }
+}
 
-module.exports = {getRegistros, getRegistrosPorUsuario, updateRegistro, getUsersNoAceptados, AceptarUsuario, RechazarUsuario};
+async function getPendientes(req, res)
+{
+    try
+    {
+        const result = await SAService.getPendientes();
+        const count = result.getRows()[0]?.total || 0;
+        return res.status(200).json({count: count});
+    } catch(error)
+    {
+        let jsonError = {
+            "status" : "error",
+            "message" : error.message
+        }
+        console.log(error);
+        return res.status(500).json(jsonError);
+    }
+}
+
+async function usuariosActivos(req, res) {
+    try {
+        const result = await SAService.usuariosActivos();
+        const count = result.getRows()[0]?.total || 0;
+        return res.status(200).json({ count: count});
+    } catch(error) {
+        let jsonError = {
+            "status" : "error",
+            "message" : error.message
+        }
+        console.log(error);
+        return res.status(500).json(jsonError);
+    }
+}
+
+async function totalRegistros(req, res) {
+    try {
+        const result = await SAService.totalRegistros();
+        const count = result.getRows()[0]?.total || 0;
+        return res.status(200).json({ count: count});
+    } catch(error) {
+        let jsonError = {
+            "status" : "error",
+            "message": error.message
+        }
+        console.log(error);
+        return res.status(500).json(jsonError);
+    }
+}
+
+async function usuariosInactivos(res) {
+    try {
+        const result = await SAService.usuariosInactivos();
+        const count = result.getRows()[0]?.total || 0;
+        return res.status(200).json({ count: count});
+    } catch(error) {
+        let jsonError = {
+            "status" : "error",
+            "message": error.message
+        }
+        console.log(error);
+        return res.status(500).json(jsonError);
+    }
+}
+module.exports = {getRegistros, 
+    getRegistrosPorUsuario, 
+    updateRegistro, 
+    getUsersNoAceptados, 
+    AceptarUsuario, 
+    RechazarUsuario, 
+    AceptarUsuariosAll, 
+    getPendientes,
+    usuariosActivos,
+    totalRegistros,
+    usuariosInactivos};

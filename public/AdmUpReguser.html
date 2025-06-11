@@ -348,7 +348,7 @@
         }        function getRoleBadgeClass(role) {
             switch (parseInt(role)) {
                 case 1: return 'admin-badge-info';     // Usuario normal
-                case 2: return 'admin-badge-warning';  // Moderador
+                case 2: return 'admin-badge-info';  // Moderador
                 case 3: return 'admin-badge-success';  // Admin
                 case 4: return 'admin-badge-danger';   // Super Admin
                 default: return 'admin-badge-info';
@@ -358,7 +358,7 @@
         function getRoleText(role) {
             switch (parseInt(role)) {
                 case 1: return 'Usuario';
-                case 2: return 'Moderador';
+                case 2: return 'EcoRanger';
                 case 3: return 'Admin';
                 case 4: return 'Super Admin';
                 default: return 'Sin rol';

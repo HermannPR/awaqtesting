@@ -348,14 +348,60 @@
             }
 
             const userRows = document.querySelectorAll('#usersTableBody tr[id^="user-"]');
-            console.log(`📦 Aprobando ${userRows.length} usuarios en lote`);
             
-            for (let row of userRows) {
-                const userId = row.id.split('-')[1];
-                await approveUser(parseInt(userId));
-                // Pequeña pausa entre aprobaciones
-                await new Promise(resolve => setTimeout(resolve, 200));
+            if (userRows.length === 0) {
+                alert('No hay usuarios pendientes para aprobar');
+                return;
             }
+            console.log(`📦 Aprobando ${userRows.length} usuarios en lote`);
+
+            const approveAllBtn = document.getElementById('approveAllBtn');
+            const originalText = approveAllBtn.innerHTML;
+            approveAllBtn.disabled = true;
+            approveAllBtn.innerHTML = '⏳ Aprobando todos...';
+
+            try
+            {
+                const response = await fetch('/Consultas/api/aceptarTodosUsuarios', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    // Animar la remoción de todos los usuarios
+                    userRows.forEach((row, index) => {
+                        setTimeout(() => {
+                            row.style.background = 'rgba(16, 185, 129, 0.1)';
+                            setTimeout(() => row.remove(), 300);
+                        }, index * 50);
+                    });
+
+                    // Actualizar UI después de las animaciones
+                    setTimeout(() => {
+                        const countElement = document.getElementById('pendingCount');
+                        if (countElement) countElement.textContent = '0';
+
+                        const emptyState = document.getElementById('emptyState');
+                        if (emptyState) emptyState.style.display = 'block';
+
+                        approveAllBtn.style.display = 'none';
+                    }, userRows.length * 50 + 500);
+
+                    alert(`✅ Todos los usuarios (${userRows.length}) fueron aprobados exitosamente`);
+                    console.log(`✅ ${userRows.length} usuarios aprobados masivamente`);
+                    } else {
+                        throw new Error(`Error HTTP: ${response.status}`);
+                    }
+                } catch (error) {
+                    console.error('❌ Error en aprobación masiva:', error);
+                    alert(`❌ Error al aprobar usuarios: ${error.message}`);
+                } finally {
+                    approveAllBtn.disabled = false;
+                    approveAllBtn.innerHTML = originalText;
+                }
         }
 
         // Funciones auxiliares

@@ -78,8 +78,8 @@ async function uploadedImageLog(image) {
         console.log('✅ Imagen guardada en disco:', filepath);
 
         // Inserta en la base de datos individualmente
-        const query = 'INSERT INTO imagenes (nombreImagen, usuario_carga) VALUES (?, ?)';
-        const result = await dataSource.insertData(query, [sanitizedFilename, image.usuario_carga]);
+        const query = 'INSERT INTO imagenes (nombreImagen, usuario_carga, idForm) VALUES (?, ?, ?)';
+        const result = await dataSource.insertData(query, [sanitizedFilename, image.usuario_carga, image.idForm || null]);
 
         if (!result.getStatus()) {
             console.error("❌ Error insertando imagen:", result.getErr());
