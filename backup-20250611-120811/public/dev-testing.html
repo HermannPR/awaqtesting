@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev Testing - MAWI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: linear-gradient(135deg, #FF6B35 0%, #E55A2B 100%);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(255, 107, 53, 0.3);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .section {
+            background: rgba(45, 45, 45, 0.8);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #444;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #FF6B35;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .test-card {
+            background: rgba(26, 26, 26, 0.6);
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #555;
+            transition: all 0.3s ease;
+        }
+
+        .test-card:hover {
+            border-color: #FF6B35;
+            box-shadow: 0 4px 16px rgba(255, 107, 53, 0.2);
+        }
+
+        .test-card h3 {
+            color: #FF6B35;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .test-card p {
+            color: #ccc;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #ddd;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #555;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #FF6B35;
+            box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.2);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #FF6B35 0%, #E55A2B 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(255, 107, 53, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #666 0%, #555 100%);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 4px 16px rgba(102, 102, 102, 0.4);
+        }
+
+        .result-area {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid #444;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .status {
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        .status.success {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+            border: 1px solid #28a745;
+        }
+
+        .status.error {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            border: 1px solid #dc3545;
+        }
+
+        .status.loading {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid #ffc107;
+        }
+
+        .credentials-preset {
+            background: rgba(255, 107, 53, 0.1);
+            border: 1px solid #FF6B35;
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 15px;
+        }
+
+        .credentials-preset h4 {
+            color: #FF6B35;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .credentials-list {
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+
+        .quick-fill-btn {
+            background: rgba(255, 107, 53, 0.2);
+            color: #FF6B35;
+            border: 1px solid #FF6B35;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .quick-fill-btn:hover {
+            background: rgba(255, 107, 53, 0.3);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .loading {
+            animation: pulse 1.5s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🧪 MAWI Development Testing</h1>
+            <p>Herramientas de desarrollo y testing para APIs y funcionalidades</p>
+        </div>
+
+        <!-- Login Testing Section -->
+        <div class="section">
+            <h2 class="section-title">
+                🔐 Testing de Autenticación
+            </h2>
+            
+            <div class="test-grid">
+                <!-- Manual Login Test -->
+                <div class="test-card">
+                    <h3>Login Manual</h3>
+                    <p>Prueba el endpoint de login con credenciales personalizadas</p>
+                    
+                    <div class="credentials-preset">
+                        <h4>📋 Credenciales Predefinidas:</h4>
+                        <div class="credentials-list">
+                            <strong>Super Admin:</strong> superadmin@mawi.com / SuperAdmin2025!
+                            <button class="quick-fill-btn" onclick="fillSuperAdmin()">Llenar</button>
+                            <br><br>
+                            <strong>Admin:</strong> admin@mawi.com / Admin2025!
+                            <button class="quick-fill-btn" onclick="fillAdmin()">Llenar</button>
+                            <br><br>
+                            <strong>Biomonitor:</strong> biomonitor@mawi.com / Bio2025!
+                            <button class="quick-fill-btn" onclick="fillBiomonitor()">Llenar</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email:</label>
+                        <input type="email" id="loginEmail" class="form-input" placeholder="usuario@ejemplo.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Contraseña:</label>
+                        <input type="password" id="loginPassword" class="form-input" placeholder="********">
+                    </div>
+                    
+                    <button class="btn" onclick="testLogin()">
+                        🚀 Probar Login
+                    </button>
+                    
+                    <button class="btn btn-secondary" onclick="clearLoginForm()">
+                        🗑️ Limpiar
+                    </button>
+                    
+                    <div id="loginStatus"></div>
+                    <div id="loginResult" class="result-area" style="display: none;"></div>
+                </div>
+
+                <!-- Auto Login Tests -->
+                <div class="test-card">
+                    <h3>Tests Automáticos</h3>
+                    <p>Ejecuta pruebas automáticas con diferentes tipos de usuarios</p>
+                    
+                    <button class="btn" onclick="testSuperAdminLogin()">
+                        👑 Test Super Admin
+                    </button>
+                    
+                    <button class="btn" onclick="testAllUsers()" style="margin-top: 10px;">
+                        🎯 Test Todos los Usuarios
+                    </button>
+                    
+                    <button class="btn btn-secondary" onclick="testInvalidLogin()" style="margin-top: 10px;">
+                        ❌ Test Credenciales Inválidas
+                    </button>
+                    
+                    <div id="autoTestStatus"></div>
+                    <div id="autoTestResult" class="result-area" style="display: none;"></div>
+                </div>
+
+                <!-- Token Management -->
+                <div class="test-card">
+                    <h3>Gestión de Tokens</h3>
+                    <p>Maneja tokens JWT para testing de APIs autenticadas</p>
+                    
+                    <button class="btn" onclick="showCurrentToken()">
+                        🎫 Ver Token Actual
+                    </button>
+                    
+                    <button class="btn" onclick="validateToken()" style="margin-top: 10px;">
+                        ✅ Validar Token
+                    </button>
+                    
+                    <button class="btn btn-secondary" onclick="clearToken()" style="margin-top: 10px;">
+                        🗑️ Limpiar Token
+                    </button>
+                    
+                    <div id="tokenStatus"></div>
+                    <div id="tokenResult" class="result-area" style="display: none;"></div>
+                </div>
+
+                <!-- API Status -->
+                <div class="test-card">
+                    <h3>Estado del Servidor</h3>
+                    <p>Verifica el estado y conectividad del servidor</p>
+                    
+                    <button class="btn" onclick="checkServerStatus()">
+                        🌐 Estado del Servidor
+                    </button>
+                    
+                    <button class="btn" onclick="testDatabaseConnection()" style="margin-top: 10px;">
+                        🗃️ Test Base de Datos
+                    </button>
+                      <div id="serverStatus"></div>
+                    <div id="serverResult" class="result-area" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Testing Section -->
+        <div class="section">
+            <h2>🔌 Testing de APIs</h2>
+            <p>Prueba endpoints específicos y funcionalidades del backend</p>
+            
+            <div class="grid">
+                <!-- Dashboard APIs -->
+                <div class="test-card">
+                    <h3>Dashboard APIs</h3>
+                    <p>Prueba endpoints de estadísticas y dashboard</p>
+                    
+                    <button class="btn api-test-btn" data-action="dashboard">
+                        📊 Test Dashboard Stats
+                    </button>
+                    
+                    <div id="apiStatus"></div>
+                    <div id="apiResult" class="result-area" style="display: none;"></div>
+                </div>
+
+                <!-- User Management APIs -->
+                <div class="test-card">
+                    <h3>User Management APIs</h3>
+                    <p>Prueba endpoints de gestión de usuarios</p>
+                    
+                    <button class="btn api-test-btn" data-action="users">
+                        👥 Test User Management
+                    </button>
+                    
+                    <div id="userApiStatus"></div>
+                    <div id="userApiResult" class="result-area" style="display: none;"></div>
+                </div>
+
+                <!-- Comprehensive Testing -->
+                <div class="test-card">
+                    <h3>Testing Completo</h3>
+                    <p>Ejecuta pruebas completas de todos los endpoints</p>
+                    
+                    <button class="btn api-test-btn" data-action="all">
+                        🎯 Test Todos los APIs
+                    </button>
+                    
+                    <button class="btn api-test-btn" data-action="health" style="margin-top: 10px;">
+                        💚 Health Check Completo
+                    </button>
+                    
+                    <div id="comprehensiveStatus"></div>
+                    <div id="comprehensiveResult" class="result-area" style="display: none;"></div>
+                </div>
+
+                <!-- Real-time Monitoring -->
+                <div class="test-card">
+                    <h3>Monitoreo en Tiempo Real</h3>
+                    <p>Monitorea el estado del sistema continuamente</p>
+                    
+                    <button class="btn" onclick="startMonitoring()" id="monitorBtn">
+                        ▶️ Iniciar Monitoreo
+                    </button>
+                    
+                    <button class="btn btn-secondary" onclick="stopMonitoring()" style="margin-top: 10px;">
+                        ⏹️ Detener Monitoreo
+                    </button>
+                    
+                    <div id="monitorStatus"></div>
+                    <div id="monitorResult" class="result-area" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const API_BASE = 'http://localhost:5000/Consultas/api';
+        
+        // Predefined credentials
+        const CREDENTIALS = {
+            superadmin: {
+                email: 'superadmin@mawi.com',
+                password: 'SuperAdmin2025!'
+            },
+            admin: {
+                email: 'admin@mawi.com',
+                password: 'Admin2025!'
+            },
+            biomonitor: {
+                email: 'biomonitor@mawi.com',
+                password: 'Bio2025!'
+            }
+        };
+
+        // Utility functions
+        function showStatus(elementId, message, type = 'loading') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        function showResult(elementId, data) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.textContent = JSON.stringify(data, null, 2);
+        }
+
+        function clearResult(elementId) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'none';
+            element.textContent = '';
+        }
+
+        // Quick fill functions
+        function fillSuperAdmin() {
+            document.getElementById('loginEmail').value = CREDENTIALS.superadmin.email;
+            document.getElementById('loginPassword').value = CREDENTIALS.superadmin.password;
+        }
+
+        function fillAdmin() {
+            document.getElementById('loginEmail').value = CREDENTIALS.admin.email;
+            document.getElementById('loginPassword').value = CREDENTIALS.admin.password;
+        }
+
+        function fillBiomonitor() {
+            document.getElementById('loginEmail').value = CREDENTIALS.biomonitor.email;
+            document.getElementById('loginPassword').value = CREDENTIALS.biomonitor.password;
+        }
+
+        function clearLoginForm() {
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('loginStatus').innerHTML = '';
+            clearResult('loginResult');
+        }
+
+        // Main login test function
+        async function testLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                showStatus('loginStatus', '⚠️ Por favor ingresa email y contraseña', 'error');
+                return;
+            }
+
+            showStatus('loginStatus', '🔄 Probando login...', 'loading');
+            clearResult('loginResult');
+
+            try {
+                const response = await fetch(`${API_BASE}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showStatus('loginStatus', '✅ Login exitoso!', 'success');
+                    
+                    // Store token
+                    if (data.token) {
+                        localStorage.setItem('token', data.token);
+                        showStatus('loginStatus', `✅ Login exitoso! Token almacenado. Rol: ${data.rol}`, 'success');
+                    }
+                } else {
+                    showStatus('loginStatus', `❌ Error: ${data.message || 'Credenciales inválidas'}`, 'error');
+                }
+
+                showResult('loginResult', {
+                    status: response.status,
+                    headers: Object.fromEntries(response.headers.entries()),
+                    body: data
+                });
+
+            } catch (error) {
+                showStatus('loginStatus', `❌ Error de conexión: ${error.message}`, 'error');
+                showResult('loginResult', { error: error.message });
+            }
+        }
+
+        // Auto test functions
+        async function testSuperAdminLogin() {
+            showStatus('autoTestStatus', '🔄 Probando Super Admin...', 'loading');
+            clearResult('autoTestResult');
+
+            try {
+                const response = await fetch(`${API_BASE}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(CREDENTIALS.superadmin)
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.token) {
+                    localStorage.setItem('token', data.token);
+                    showStatus('autoTestStatus', `✅ Super Admin login exitoso! Rol: ${data.rol}`, 'success');
+                } else {
+                    showStatus('autoTestStatus', `❌ Error en Super Admin login`, 'error');
+                }
+
+                showResult('autoTestResult', data);
+
+            } catch (error) {
+                showStatus('autoTestStatus', `❌ Error: ${error.message}`, 'error');
+                showResult('autoTestResult', { error: error.message });
+            }
+        }
+
+        async function testAllUsers() {
+            showStatus('autoTestStatus', '🔄 Probando todos los usuarios...', 'loading');
+            clearResult('autoTestResult');
+
+            const results = {};
+
+            for (const [userType, credentials] of Object.entries(CREDENTIALS)) {
+                try {
+                    const response = await fetch(`${API_BASE}/login`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(credentials)
+                    });
+
+                    const data = await response.json();
+                    results[userType] = {
+                        status: response.status,
+                        success: response.ok,
+                        data: data
+                    };
+
+                } catch (error) {
+                    results[userType] = {
+                        success: false,
+                        error: error.message
+                    };
+                }
+            }
+
+            const successCount = Object.values(results).filter(r => r.success).length;
+            showStatus('autoTestStatus', `✅ Completado: ${successCount}/${Object.keys(CREDENTIALS).length} usuarios exitosos`, 'success');
+            showResult('autoTestResult', results);
+        }
+
+        async function testInvalidLogin() {
+            showStatus('autoTestStatus', '🔄 Probando credenciales inválidas...', 'loading');
+            clearResult('autoTestResult');
+
+            try {
+                const response = await fetch(`${API_BASE}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'invalid@test.com',
+                        password: 'wrongpassword'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showStatus('autoTestStatus', '✅ Test exitoso: credenciales inválidas rechazadas correctamente', 'success');
+                } else {
+                    showStatus('autoTestStatus', '❌ Error: credenciales inválidas fueron aceptadas', 'error');
+                }
+
+                showResult('autoTestResult', data);
+
+            } catch (error) {
+                showStatus('autoTestStatus', `❌ Error: ${error.message}`, 'error');
+                showResult('autoTestResult', { error: error.message });
+            }
+        }
+
+        // Token management
+        function showCurrentToken() {
+            const token = localStorage.getItem('token');
+            
+            if (token) {
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    showStatus('tokenStatus', '✅ Token encontrado', 'success');
+                    showResult('tokenResult', {
+                        token: token,
+                        payload: payload,
+                        expiry: new Date(payload.exp * 1000).toLocaleString()
+                    });
+                } catch (error) {
+                    showStatus('tokenStatus', '❌ Token inválido', 'error');
+                    showResult('tokenResult', { token: token, error: 'Invalid token format' });
+                }
+            } else {
+                showStatus('tokenStatus', '⚠️ No hay token almacenado', 'error');
+                clearResult('tokenResult');
+            }
+        }
+
+        async function validateToken() {
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                showStatus('tokenStatus', '⚠️ No hay token para validar', 'error');
+                return;
+            }
+
+            showStatus('tokenStatus', '🔄 Validando token...', 'loading');
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/profile`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showStatus('tokenStatus', '✅ Token válido', 'success');
+                } else {
+                    showStatus('tokenStatus', '❌ Token inválido o expirado', 'error');
+                }
+
+                showResult('tokenResult', data);
+
+            } catch (error) {
+                showStatus('tokenStatus', `❌ Error validando token: ${error.message}`, 'error');
+                showResult('tokenResult', { error: error.message });
+            }
+        }
+
+        function clearToken() {
+            localStorage.removeItem('token');
+            showStatus('tokenStatus', '✅ Token eliminado', 'success');
+            clearResult('tokenResult');
+        }
+
+        // Server status
+        async function checkServerStatus() {
+            showStatus('serverStatus', '🔄 Verificando servidor...', 'loading');
+            clearResult('serverResult');
+
+            try {
+                const startTime = Date.now();
+                const response = await fetch(`${API_BASE}/stats/general`, {
+                    method: 'GET'
+                });
+                const endTime = Date.now();
+
+                const data = await response.text();
+                
+                showStatus('serverStatus', `✅ Servidor activo (${endTime - startTime}ms)`, 'success');
+                showResult('serverResult', {
+                    status: response.status,
+                    responseTime: `${endTime - startTime}ms`,
+                    headers: Object.fromEntries(response.headers.entries()),
+                    body: data.substring(0, 500) + (data.length > 500 ? '...' : '')
+                });
+
+            } catch (error) {
+                showStatus('serverStatus', `❌ Servidor no disponible: ${error.message}`, 'error');
+                showResult('serverResult', { error: error.message });
+            }
+        }
+
+        async function testDatabaseConnection() {
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                showStatus('serverStatus', '⚠️ Necesitas estar logueado para probar la BD', 'error');
+                return;
+            }
+
+            showStatus('serverStatus', '🔄 Probando conexión a BD...', 'loading');
+            clearResult('serverResult');
+
+            try {
+                const response = await fetch(`${API_BASE}/usuariosActivos`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showStatus('serverStatus', '✅ Base de datos conectada', 'success');
+                } else {
+                    showStatus('serverStatus', '❌ Error de conexión a BD', 'error');
+                }
+
+                showResult('serverResult', data);
+
+            } catch (error) {
+                showStatus('serverStatus', `❌ Error: ${error.message}`, 'error');
+                showResult('serverResult', { error: error.message });
+            }
+        }        // API Testing Functions
+        async function testDashboardStats() {
+            showStatus('apiStatus', '🔄 Testing Dashboard Stats API...', 'loading');
+            
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    showStatus('apiStatus', '❌ No token found. Login first.', 'error');
+                    return;
+                }
+
+                const endpoints = [
+                    '/api/stats/general',
+                    '/api/stats/activity', 
+                    '/api/stats/timeseries',
+                    '/api/stats/superadmin'
+                ];
+
+                let results = {};
+                
+                for (const endpoint of endpoints) {
+                    const response = await fetch(`${API_BASE}${endpoint}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    results[endpoint] = {
+                        status: response.status,
+                        ok: response.ok,
+                        data: data
+                    };
+                }
+
+                showStatus('apiStatus', '✅ Dashboard Stats API tested', 'success');
+                showResult('apiResult', results);
+
+            } catch (error) {
+                showStatus('apiStatus', `❌ Error: ${error.message}`, 'error');
+                showResult('apiResult', { error: error.message });
+            }
+        }
+
+        async function testUserManagementAPI() {
+            showStatus('userApiStatus', '🔄 Testing User Management API...', 'loading');
+            
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    showStatus('userApiStatus', '❌ No token found. Login first.', 'error');
+                    return;
+                }
+
+                const endpoints = [
+                    '/api/admin/users/pending',
+                    '/api/admin/users/rechazados',
+                    '/api/admin/users/pendingCount',
+                    '/api/admin/users/rechazadosCount'
+                ];
+
+                let results = {};
+                
+                for (const endpoint of endpoints) {
+                    const response = await fetch(`${API_BASE}${endpoint}`, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    results[endpoint] = {
+                        status: response.status,
+                        ok: response.ok,
+                        data: data
+                    };
+                }
+
+                showStatus('userApiStatus', '✅ User Management API tested', 'success');
+                showResult('userApiResult', results);
+
+            } catch (error) {
+                showStatus('userApiStatus', `❌ Error: ${error.message}`, 'error');
+                showResult('userApiResult', { error: error.message });
+            }
+        }
+
+        async function testAllAPIEndpoints() {
+            showStatus('comprehensiveStatus', '🔄 Testing ALL API endpoints...', 'loading');
+            
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    showStatus('comprehensiveStatus', '❌ No token found. Login first.', 'error');
+                    return;
+                }
+
+                const allEndpoints = [
+                    // Authentication
+                    { endpoint: '/api/users/login', method: 'POST', requiresAuth: false },
+                    
+                    // Dashboard Stats
+                    { endpoint: '/api/stats/general', method: 'GET', requiresAuth: true },
+                    { endpoint: '/api/stats/activity', method: 'GET', requiresAuth: true },
+                    { endpoint: '/api/stats/timeseries', method: 'GET', requiresAuth: true },
+                    { endpoint: '/api/stats/superadmin', method: 'GET', requiresAuth: true },
+                    
+                    // User Management
+                    { endpoint: '/api/admin/users/pending', method: 'GET', requiresAuth: true },
+                    { endpoint: '/api/admin/users/rechazados', method: 'GET', requiresAuth: true },
+                    { endpoint: '/api/admin/users/pendingCount', method: 'GET', requiresAuth: true },
+                    { endpoint: '/api/admin/users/rechazadosCount', method: 'GET', requiresAuth: true },
+                    
+                    // Server Health
+                    { endpoint: '/health', method: 'GET', requiresAuth: false }
+                ];
+
+                let results = {
+                    summary: {
+                        total: allEndpoints.length,
+                        success: 0,
+                        failed: 0,
+                        errors: []
+                    },
+                    endpoints: {}
+                };
+                
+                for (const {endpoint, method, requiresAuth} of allEndpoints) {
+                    try {
+                        const headers = {
+                            'Content-Type': 'application/json'
+                        };
+                        
+                        if (requiresAuth) {
+                            headers['Authorization'] = `Bearer ${token}`;
+                        }
+
+                        const response = await fetch(`${API_BASE}${endpoint}`, {
+                            method: method,
+                            headers: headers
+                        });
+                        
+                        const data = await response.json();
+                        
+                        results.endpoints[endpoint] = {
+                            method: method,
+                            status: response.status,
+                            ok: response.ok,
+                            requiresAuth: requiresAuth,
+                            data: data
+                        };
+
+                        if (response.ok) {
+                            results.summary.success++;
+                        } else {
+                            results.summary.failed++;
+                            results.summary.errors.push(`${endpoint}: ${response.status}`);
+                        }
+
+                    } catch (error) {
+                        results.summary.failed++;
+                        results.summary.errors.push(`${endpoint}: ${error.message}`);
+                        results.endpoints[endpoint] = {
+                            method: method,
+                            error: error.message,
+                            requiresAuth: requiresAuth
+                        };
+                    }
+                    
+                    // Small delay between requests
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+
+                const successRate = (results.summary.success / results.summary.total * 100).toFixed(1);
+                showStatus('comprehensiveStatus', `✅ API Testing Complete: ${results.summary.success}/${results.summary.total} (${successRate}%)`, 'success');
+                showResult('comprehensiveResult', results);
+
+            } catch (error) {
+                showStatus('comprehensiveStatus', `❌ Error: ${error.message}`, 'error');
+                showResult('comprehensiveResult', { error: error.message });
+            }
+        }
+
+        async function performHealthCheck() {
+            showStatus('comprehensiveStatus', '🔄 Performing complete health check...', 'loading');
+            
+            try {
+                let healthReport = {
+                    timestamp: new Date().toISOString(),
+                    server: {},
+                    database: {},
+                    authentication: {},
+                    apis: {}
+                };
+
+                // Test server connection
+                try {
+                    const serverResponse = await fetch(`${API_BASE}/health`);
+                    healthReport.server = {
+                        status: serverResponse.ok ? 'UP' : 'DOWN',
+                        responseTime: Date.now(),
+                        statusCode: serverResponse.status
+                    };
+                } catch (error) {
+                    healthReport.server = {
+                        status: 'DOWN',
+                        error: error.message
+                    };
+                }
+
+                // Test authentication with stored token
+                const token = localStorage.getItem('token');
+                if (token) {
+                    try {
+                        const authResponse = await fetch(`${API_BASE}/users/profile`, {
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            }
+                        });
+                        healthReport.authentication = {
+                            status: authResponse.ok ? 'VALID' : 'INVALID',
+                            tokenPresent: true,
+                            statusCode: authResponse.status
+                        };
+                    } catch (error) {
+                        healthReport.authentication = {
+                            status: 'ERROR',
+                            tokenPresent: true,
+                            error: error.message
+                        };
+                    }
+                } else {
+                    healthReport.authentication = {
+                        status: 'NO_TOKEN',
+                        tokenPresent: false
+                    };
+                }
+
+                // Test key API endpoints
+                const keyEndpoints = ['/api/stats/general', '/api/admin/users/pending'];
+                for (const endpoint of keyEndpoints) {
+                    try {
+                        const response = await fetch(`${API_BASE}${endpoint}`, {
+                            headers: token ? {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            } : {}
+                        });
+                        healthReport.apis[endpoint] = {
+                            status: response.ok ? 'UP' : 'DOWN',
+                            statusCode: response.status
+                        };
+                    } catch (error) {
+                        healthReport.apis[endpoint] = {
+                            status: 'ERROR',
+                            error: error.message
+                        };
+                    }
+                }
+
+                const overallHealth = 
+                    healthReport.server.status === 'UP' &&
+                    (healthReport.authentication.status === 'VALID' || healthReport.authentication.status === 'NO_TOKEN') &&
+                    Object.values(healthReport.apis).every(api => api.status === 'UP');
+
+                showStatus('comprehensiveStatus', 
+                    overallHealth ? '✅ System Health: GOOD' : '⚠️ System Health: ISSUES DETECTED', 
+                    overallHealth ? 'success' : 'error'
+                );
+                showResult('comprehensiveResult', healthReport);
+
+            } catch (error) {
+                showStatus('comprehensiveStatus', `❌ Health check failed: ${error.message}`, 'error');
+                showResult('comprehensiveResult', { error: error.message });
+            }
+        }
+
+        // Real-time monitoring functions
+        let monitoringInterval = null;
+        let monitoringActive = false;
+
+        function startMonitoring() {
+            if (monitoringActive) {
+                showStatus('monitorStatus', '⚠️ Monitoring is already active', 'error');
+                return;
+            }
+
+            monitoringActive = true;
+            document.getElementById('monitorBtn').textContent = '🔄 Monitoring Active...';
+            showStatus('monitorStatus', '🔄 Starting real-time monitoring...', 'loading');
+
+            let monitorData = {
+                startTime: new Date().toISOString(),
+                checks: [],
+                stats: {
+                    totalChecks: 0,
+                    successfulChecks: 0,
+                    failedChecks: 0
+                }
+            };
+
+            monitoringInterval = setInterval(async () => {
+                const checkTime = new Date().toISOString();
+                let checkResult = {
+                    timestamp: checkTime,
+                    server: 'DOWN',
+                    responseTime: null
+                };
+
+                try {
+                    const startTime = Date.now();
+                    const response = await fetch(`${API_BASE}/health`, { timeout: 5000 });
+                    const endTime = Date.now();
+                    
+                    checkResult.server = response.ok ? 'UP' : 'DOWN';
+                    checkResult.responseTime = endTime - startTime;
+                    checkResult.statusCode = response.status;
+
+                    if (response.ok) {
+                        monitorData.stats.successfulChecks++;
+                    } else {
+                        monitorData.stats.failedChecks++;
+                    }
+
+                } catch (error) {
+                    checkResult.error = error.message;
+                    monitorData.stats.failedChecks++;
+                }
+
+                monitorData.stats.totalChecks++;
+                monitorData.checks.push(checkResult);
+
+                // Keep only last 20 checks
+                if (monitorData.checks.length > 20) {
+                    monitorData.checks = monitorData.checks.slice(-20);
+                }
+
+                const uptime = ((monitorData.stats.successfulChecks / monitorData.stats.totalChecks) * 100).toFixed(1);
+                const avgResponseTime = monitorData.checks
+                    .filter(c => c.responseTime)
+                    .reduce((sum, c) => sum + c.responseTime, 0) / 
+                    monitorData.checks.filter(c => c.responseTime).length;
+
+                showStatus('monitorStatus', 
+                    `📊 Uptime: ${uptime}% | Avg Response: ${avgResponseTime?.toFixed(0) || 'N/A'}ms | Checks: ${monitorData.stats.totalChecks}`, 
+                    checkResult.server === 'UP' ? 'success' : 'error'
+                );
+                showResult('monitorResult', monitorData);
+
+            }, 3000); // Check every 3 seconds
+
+            setTimeout(() => {
+                showStatus('monitorStatus', '✅ Real-time monitoring started (every 3 seconds)', 'success');
+            }, 100);
+        }
+
+        function stopMonitoring() {
+            if (!monitoringActive) {
+                showStatus('monitorStatus', '⚠️ No active monitoring to stop', 'error');
+                return;
+            }
+
+            clearInterval(monitoringInterval);
+            monitoringActive = false;
+            document.getElementById('monitorBtn').textContent = '▶️ Iniciar Monitoreo';
+            showStatus('monitorStatus', '⏹️ Monitoring stopped', 'success');
+        }        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🧪 MAWI Dev Testing Tool initialized');
+            console.log('📡 API Base:', API_BASE);
+            
+            // Check if there's a stored token
+            const token = localStorage.getItem('token');
+            if (token) {
+                console.log('🎫 Token found in localStorage');
+                showStatus('tokenStatus', '✅ Token found in localStorage', 'success');
+            } else {
+                console.log('❌ No token in localStorage');
+                showStatus('tokenStatus', '❌ No token found', 'error');
+            }
+
+            // Add event listeners for API testing buttons
+            const apiButtons = document.querySelectorAll('.api-test-btn');
+            apiButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const action = this.dataset.action;
+                    switch(action) {
+                        case 'dashboard':
+                            testDashboardStats();
+                            break;
+                        case 'users':
+                            testUserManagementAPI();
+                            break;
+                        case 'all':
+                            testAllAPIEndpoints();
+                            break;
+                        case 'health':
+                            performHealthCheck();
+                            break;
+                        default:
+                            console.warn('Unknown action:', action);
+                    }
+                });
+            });
+
+            // Auto-check server status on load
+            setTimeout(() => {
+                checkServerStatus();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Super Admin - MAWI</title>
+    <link rel="stylesheet" href="css/admin-dashboard-stats.css">
+    <link rel="stylesheet" href="css/sidebar-styles.css">
+    <!-- Chart.js para gráficas -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body data-page="super-admin">
+    <div class="admin-app-container">
+        <!-- Header -->
+        <header class="admin-header">
+            <div class="admin-logo">
+                <div class="admin-logo-icon">M</div>
+                <h1>MAWI Super Admin</h1>
+            </div>
+            <div class="admin-user-menu">
+                <div class="admin-user-info">
+                    <div class="admin-avatar" id="userAvatar">SA</div>
+                    <div>
+                        <div class="admin-username" id="userName">Super Admin</div>
+                        <div class="admin-user-role" id="userRole">Sistema Administrador</div>
+                    </div>
+                </div>
+                <button class="admin-btn admin-btn-secondary" onclick="logout()">
+                    <span>🚪</span> Cerrar Sesión
+                </button>
+            </div>
+        </header>
+
+        <!-- Sidebar Toggle -->
+        <button class="sidebar-toggle" id="sidebarToggle" aria-label="Abrir/cerrar menú lateral">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9,18 15,12 9,6"></polyline>
+            </svg>
+        </button>
+
+        <div class="admin-content-wrapper">
+            <!-- Sidebar Container -->
+            <div id="sidebar-container"></div>
+
+            <!-- Main Content -->
+            <main class="admin-main-content with-sidebar">
+                <!-- Page Header -->
+                <div class="page-header">
+                    <div>
+                        <h1 class="page-title">🔧 Panel de Control Super Admin</h1>
+                        <p class="page-subtitle">Centro de administración del sistema MAWI</p>
+                    </div>
+                    <div class="page-actions">
+                        <button class="admin-btn admin-btn-primary" onclick="refreshDashboard()">
+                            🔄 Actualizar
+                        </button>
+                        <button class="admin-btn admin-btn-secondary" onclick="showSystemInfo()">
+                            ℹ️ Info Sistema
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions-section">
+                    <h2 class="section-title">⚡ Acciones Rápidas</h2>
+                    <div class="quick-actions-grid">
+                        <button class="quick-action-card" onclick="approveAllUsers()">
+                            <div class="quick-action-icon">👥</div>
+                            <h3>Aprobar Todos los Usuarios</h3>
+                            <p>Aprobar todos los usuarios pendientes de una vez</p>
+                        </button>
+
+                        <button class="quick-action-card" onclick="window.location.href='dashboard-stats.html'">
+                            <div class="quick-action-icon">📊</div>
+                            <h3>Ver Estadísticas Detalladas</h3>
+                            <p>Dashboard completo con métricas y gráficas</p>
+                        </button>
+
+                        <button class="quick-action-card" onclick="exportSystemData()">
+                            <div class="quick-action-icon">📥</div>
+                            <h3>Exportar Datos</h3>
+                            <p>Descargar respaldo completo del sistema</p>
+                        </button>
+
+                        <button class="quick-action-card" onclick="systemMaintenance()">
+                            <div class="quick-action-icon">⚙️</div>
+                            <h3>Mantenimiento</h3>
+                            <p>Ejecutar tareas de mantenimiento del sistema</p>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- System Overview Stats -->
+                <div class="overview-section">
+                    <h2 class="section-title">📋 Resumen del Sistema</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card stat-card-primary">
+                            <div class="stat-icon">👥</div>
+                            <div class="stat-content">
+                                <h3 class="stat-title">Usuarios Pendientes</h3>
+                                <p class="stat-value" id="pendingUsersCount">0</p>
+                                <div class="stat-actions">
+                                    <a href="SAaceptarusuarios.html" class="stat-link">Ver todos →</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card stat-card-success">
+                            <div class="stat-icon">✅</div>
+                            <div class="stat-content">
+                                <h3 class="stat-title">Usuarios Activos</h3>
+                                <p class="stat-value" id="activeUsersCount">0</p>
+                                <div class="stat-actions">
+                                    <a href="AdmUpReguser.html" class="stat-link">Gestionar →</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card stat-card-warning">
+                            <div class="stat-icon">📊</div>
+                            <div class="stat-content">
+                                <h3 class="stat-title">Total Registros</h3>
+                                <p class="stat-value" id="totalRecordsCount">0</p>
+                                <div class="stat-actions">
+                                    <a href="dashboard-stats.html" class="stat-link">Ver detalles →</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card stat-card-info">
+                            <div class="stat-icon">🌿</div>
+                            <div class="stat-content">
+                                <h3 class="stat-title">Biomonitoreos</h3>
+                                <p class="stat-value" id="biomonitoringCount">0</p>
+                                <div class="stat-actions">
+                                    <a href="dashboard-stats.html" class="stat-link">Analizar →</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Management Modules -->
+                <div class="modules-section">
+                    <h2 class="section-title">🛠️ Módulos de Administración</h2>
+                    <div class="modules-grid">
+                        <!-- User Management Module -->
+                        <div class="module-card">
+                            <div class="module-header">
+                                <div class="module-icon">👥</div>
+                                <h3>Gestión de Usuarios</h3>
+                            </div>
+                            <div class="module-content">
+                                <p>Administra usuarios, roles y permisos del sistema</p>
+                                <div class="module-stats">
+                                    <div class="module-stat">
+                                        <span class="stat-number" id="pendingUsersModule">0</span>
+                                        <span class="stat-label">Pendientes</span>
+                                    </div>
+                                    <div class="module-stat">
+                                        <span class="stat-number" id="activeUsersModule">0</span>
+                                        <span class="stat-label">Activos</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="module-actions">
+                                <a href="SAaceptarusuarios.html" class="admin-btn admin-btn-outline">
+                                    Aprobar Usuarios
+                                </a>
+                                <a href="AdmUpReguser.html" class="admin-btn admin-btn-primary">
+                                    Gestionar
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Analytics Module -->
+                        <div class="module-card">
+                            <div class="module-header">
+                                <div class="module-icon">📊</div>
+                                <h3>Analytics y Reportes</h3>
+                            </div>
+                            <div class="module-content">
+                                <p>Visualiza estadísticas y genera reportes del sistema</p>
+                                <div class="module-stats">
+                                    <div class="module-stat">
+                                        <span class="stat-number" id="totalDataModule">0</span>
+                                        <span class="stat-label">Registros</span>
+                                    </div>
+                                    <div class="module-stat">
+                                        <span class="stat-number" id="biomonitorsModule">0</span>
+                                        <span class="stat-label">Biomonitoreos</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="module-actions">
+                                <a href="dashboard-stats.html" class="admin-btn admin-btn-primary">
+                                    Ver Dashboard
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- System Configuration Module -->
+                        <div class="module-card">
+                            <div class="module-header">
+                                <div class="module-icon">⚙️</div>
+                                <h3>Configuración del Sistema</h3>
+                            </div>
+                            <div class="module-content">
+                                <p>Configura parámetros globales y mantenimiento</p>
+                                <div class="module-stats">
+                                    <div class="module-stat">
+                                        <span class="stat-number" id="systemStatus">🟢</span>
+                                        <span class="stat-label">Estado</span>
+                                    </div>
+                                    <div class="module-stat">
+                                        <span class="stat-number" id="lastBackup">N/A</span>
+                                        <span class="stat-label">Último Backup</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="module-actions">
+                                <button class="admin-btn admin-btn-outline" onclick="createBackup()">
+                                    Crear Backup
+                                </button>
+                                <button class="admin-btn admin-btn-primary" onclick="showSystemConfig()">
+                                    Configurar
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- MAWI Platform Access -->
+                        <div class="module-card">
+                            <div class="module-header">
+                                <div class="module-icon">🏠</div>
+                                <h3>Plataforma MAWI</h3>
+                            </div>
+                            <div class="module-content">
+                                <p>Accede al dashboard principal de la plataforma MAWI</p>
+                                <div class="module-stats">
+                                    <div class="module-stat">
+                                        <span class="stat-number">🌿</span>
+                                        <span class="stat-label">Bio</span>
+                                    </div>
+                                    <div class="module-stat">
+                                        <span class="stat-number">📋</span>
+                                        <span class="stat-label">Proyectos</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="module-actions">
+                                <a href="dashboard.html" class="admin-btn admin-btn-primary">
+                                    Ir a MAWI
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="activity-section">
+                    <div class="section-header">
+                        <h2 class="section-title">🔄 Actividad Reciente del Sistema</h2>
+                        <button class="admin-btn admin-btn-outline" onclick="loadSystemActivity()">
+                            Actualizar
+                        </button>
+                    </div>
+                    <div class="activity-feed" id="systemActivityFeed">
+                        <div class="activity-item">
+                            <div class="activity-icon">👤</div>
+                            <div class="activity-content">
+                                <div class="activity-title">Sistema iniciado</div>
+                                <div class="activity-detail">El panel de Super Admin se ha cargado correctamente</div>
+                            </div>
+                            <div class="activity-time">Hace unos momentos</div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/admin-super-admin.js"></script>
+    <script>
+        // Logout function
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = 'login.html';
+        }
+
+        // Initialize super admin dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSuperAdminDashboard();
+        });
+    </script>
+</body>
+</html>
