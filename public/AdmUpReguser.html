@@ -312,8 +312,116 @@
                 return matchesStatus && matchesRole && matchesSearch;
             });
 
-            displayUsers(filteredUsers);
-            document.getElementById('userCount').textContent = filteredUsers.length;
+            displayUsers(filteredUsers);            document.getElementById('userCount').textContent = filteredUsers.length;
+        }
+
+        // Función para alternar detalles del usuario
+        async function toggleUserDetails(userId) {
+            const detailsRow = document.getElementById(`details-${userId}`);
+            const registrosContainer = document.getElementById(`registros-${userId}`);
+            
+            if (detailsRow.classList.contains('show')) {
+                detailsRow.classList.remove('show');
+                return;
+            }
+
+            detailsRow.classList.add('show');
+            
+            // Cargar registros si no se han cargado
+            if (registrosContainer.innerHTML.includes('Cargando registros...')) {
+                try {
+                    const response = await fetch(`/Consultas/api/getRegistros/${userId}`, {
+                        headers: {
+                            'Authorization': `Bearer ${userToken}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        const results = await response.json();
+                        const registros = results.registros;
+                        
+                        if (registros.length === 0) {
+                            registrosContainer.innerHTML = `
+                                <div style="text-align: center; color: var(--admin-text-secondary); padding: 1rem;">
+                                    No hay registros disponibles
+                                </div>
+                            `;
+                        } else {
+                            registrosContainer.innerHTML = `
+                                <table class="admin-table" style="margin-top: 0;">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Tipo</th>
+                                            <th>Fecha</th>
+                                            <th>Estado</th>
+                                            <th>Descripción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${registros.map(registro => `
+                                            <tr>
+                                                <td>${registro.id}</td>
+                                                <td>
+                                                    <span class="admin-badge admin-badge-info">
+                                                        ${registro.tipo || 'Sin tipo'}
+                                                    </span>
+                                                </td>
+                                                <td>${registro.fecha ? new Date(registro.fecha).toLocaleDateString('es-ES') : 'Sin fecha'}</td>
+                                                <td>
+                                                    <span class="admin-badge ${getStatusBadgeClass(registro.estado)}">
+                                                        ${registro.estado || 'Sin estado'}
+                                                    </span>
+                                                </td>
+                                                <td>${registro.descripcion || 'Sin descripción'}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            `;
+                        }
+                    } else {
+                        throw new Error('Error al cargar registros');
+                    }
+                } catch (error) {
+                    console.error('Error loading user records:', error);
+                    registrosContainer.innerHTML = `
+                        <div style="text-align: center; color: var(--admin-danger); padding: 1rem;">
+                            Error al cargar registros: ${error.message}
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        // Funciones para obtener clases de badges
+        function getStatusBadgeClass(status) {
+            switch (status?.toLowerCase()) {
+                case 'activo':
+                case 'completado':
+                case 'success':
+                    return 'admin-badge-success';
+                case 'pendiente':
+                case 'en proceso':
+                case 'warning':
+                    return 'admin-badge-warning';
+                case 'inactivo':
+                case 'error':
+                case 'rechazado':
+                    return 'admin-badge-danger';
+                default: return 'admin-badge-info';
+            }
+        }
+
+        function getRoleBadgeClass(role) {
+            switch (parseInt(role)) {
+                case 1: return 'admin-badge-info';     // Usuario normal
+                case 2: return 'admin-badge-info';  // Moderador
+                case 3: return 'admin-badge-success';  // Admin
+                case 4: return 'admin-badge-danger';   // Super Admin
+                default: return 'admin-badge-info';
+            }
         }
 
         // Funciones auxiliares
