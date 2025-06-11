@@ -59,7 +59,7 @@ async function main() {
         
         // Verificar la actualización
         const [check] = await connection.execute(
-            'SELECT email, password FROM usuarios WHERE email = ?',
+            'SELECT email, password FROM Usuarios WHERE email = ?',
             [email]
         );
         

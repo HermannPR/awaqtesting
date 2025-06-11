@@ -73,7 +73,7 @@ async function updatePasswords() {
             console.log(`\n🧪 Testing: ${cred.email}`);
             
             const [users] = await connection.execute(
-                'SELECT email, password FROM usuarios WHERE email = ?',
+                'SELECT email, password FROM Usuarios WHERE email = ?',
                 [cred.email]
             );
             
