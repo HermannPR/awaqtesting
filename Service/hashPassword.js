@@ -28,7 +28,7 @@ function encryptPassword(password, salt) {
  * @returns
  */
 async function isValidUser(username, password){
-    let query = 'SELECT idUsuario as id, email, Nombre as nombre, password FROM usuarios WHERE email = ?';
+    let query = 'SELECT idUsuario as id, email, Nombre as nombre, password FROM Usuarios WHERE email = ?';
     let params = [username];
     let qResult = await dataSource.getDataWithParams(query, params);
     let user = qResult.rows[0];

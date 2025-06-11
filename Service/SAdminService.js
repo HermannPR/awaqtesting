@@ -43,11 +43,9 @@ async function getRegistrosPorUsuario(idUsuario) {
         if(!allowedT.includes(tipoRegistro))
         {
             throw new Error('Tipo de registro no permitido');
-        }
-
-        let query = `
+        }        let query = `
         SELECT fi.*, R.*, u.*
-        FROM usuario u
+        FROM Usuarios u
         JOIN formularioInicial fi ON u.idUsuario = fi.idCreador
         JOIN ${tipoRegistro} R ON fi.idFormIn = R.idRegistro
         WHERE u.idUsuario = ?
@@ -138,7 +136,7 @@ async function getUsersNoAceptados()
     let qResult;
     try
     {
-        let query = "SELECT * FROM usuarios WHERE estado = ?";
+        let query = "SELECT * FROM Usuarios WHERE estado = ?";
         let params = ['P']; 
         qResult = await dataSource.getDataWithParams(query, params);
     }
@@ -204,9 +202,8 @@ async function AceptarUsuariosAll()
 }
 
 async function getPendientes() {
-    let qResult;
-    try {
-        let query = "SELECT count(*) as total FROM usuarios WHERE estado = ?";
+    let qResult;    try {
+        let query = "SELECT count(*) as total FROM Usuarios WHERE estado = ?";
         let params = ['P'];
         qResult = await dataSource.getDataWithParams(query, params);
     } catch(err) {
@@ -215,10 +212,9 @@ async function getPendientes() {
     return qResult;
 }
 
-async function usuariosActivos() {
-    let qResult;
+async function usuariosActivos() {    let qResult;
     try {
-        let query = "SELECT count(*) as total FROM usuarios WHERE estado = ?";
+        let query = "SELECT count(*) as total FROM Usuarios WHERE estado = ?";
         let params = ['A'];
         qResult = await dataSource.getDataWithParams(query, params);
     } catch(err) {
@@ -241,7 +237,7 @@ async function totalRegistros() {
 async function usuariosInactivos() {
     let qResult;
     try {
-        let query = "SELECT count(*) as total FROM usuarios WHERE estado = ?";
+        let query = "SELECT count(*) as total FROM Usuarios WHERE estado = ?";
         let params = ['I'];
         qResult = await dataSource.getDataWithParams(query, params);
     } catch(err) {

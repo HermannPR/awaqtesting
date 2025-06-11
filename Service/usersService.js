@@ -7,9 +7,8 @@ require('dotenv').config();
  */
 async function getUsers(){
     let qResult;
-    try{
-        let query = `SELECT u.idUsuario, u.Nombre, u.Apellidos, u.email, u.rol, u.estado, count(fi.idCreador) as TotalRegistros
-        FROM usuario u left join formularioinicial fi on fi.idCreador = u.idUsuario
+    try{        let query = `SELECT u.idUsuario, u.Nombre, u.Apellidos, u.email, u.rol, u.estado, count(fi.idCreador) as TotalRegistros
+        FROM Usuarios u left join formularioinicial fi on fi.idCreador = u.idUsuario
         WHERE u.estado = ?
         group by u.idUsuario, u.Nombre, u.Apellidos, u.email, u.rol, u.estado
         order by u.idUsuario
@@ -29,7 +28,7 @@ async function getUsers(){
 async function findUser(idUsuario){
     let qResult;
     try{
-        let query = "SELECT * FROM usuarios WHERE idUsuario = ?";
+        let query = "SELECT * FROM Usuarios WHERE idUsuario = ?";
         let params = [idUsuario];
         qResult = await dataSource.getDataWithParams(query, params);
     }catch(err){
@@ -42,7 +41,7 @@ async function getValores(email)
     let qResult;
     try
     {
-        let query = "SELECT estado, rol FROM usuarios WHERE email = ?";
+        let query = "SELECT estado, rol FROM Usuarios WHERE email = ?";
         let params = [email];
         qResult = await dataSource.getDataWithParams(query, params);
     }
@@ -154,7 +153,7 @@ async function updateUser(user, idUsuario){
 async function deleteUser(user_id){
     let qResult;
     try{
-        let query = "DELETE FROM usuario WHERE idUsuario = ?";
+        let query = "DELETE FROM Usuarios WHERE idUsuario = ?";
         let params = [user_id];
         qResult = await dataSource.deleteUser(query, params);
     }catch(err){
