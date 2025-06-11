@@ -273,7 +273,7 @@
             // Cargar registros si no se han cargado
             if (registrosContainer.innerHTML.includes('Cargando registros...')) {
                 try {
-                    const response = await fetch(`/Consultas/api/SAdmin/userregistros/${userId}`, {
+                    const response = await fetch(`/Consultas/api/getRegistros/${userId}`, {
                         headers: {
                             'Authorization': `Bearer ${userToken}`,
                             'Content-Type': 'application/json'
@@ -281,7 +281,8 @@
                     });
 
                     if (response.ok) {
-                        const registros = await response.json();
+                        const results = await response.json();
+                        const registros = results.registros;
                         
                         if (registros.length === 0) {
                             registrosContainer.innerHTML = `

@@ -10,10 +10,7 @@ const aiChatRest = require('./API/aiChatController');
 
 const router = express.Router();
 
-//router.get(constants.indexURL, templates.index);
-//router.get(constants.contextURL, templates.homePage);
-// router.get(constants.contextURL+'/login', templates.getLogin);
-// router.get(constants.contextURL+'/logout', templates.logout);
+
 
 //Rutas de la API
 router.post(constants.contextURL + constants.apiURL + "/login", usersRest.execLogin);
@@ -22,6 +19,11 @@ router.get(constants.contextURL + constants.apiURL + "/findUser/:idUsuario", use
 router.post(constants.contextURL + constants.apiURL + "/insertUser", usersRest.insertUser);
 router.put(constants.contextURL + constants.apiURL + "/updateUser", usersRest.authenticateToken, usersRest.updateUser);
 router.delete(constants.contextURL + constants.apiURL + "/deleteUser", usersRest.authenticateToken, usersRest.deleteUser);
+
+//convocatorias
+router.post(constants.contextURL + constants.apiURL + "/insertConvocatorias/:idUsuario", usersRest.authenticateToken, usersRest.insertConvocatorias);
+router.get(constants.contextURL + constants.apiURL + "getConvocatoriasAbiertas", usersRest.authenticateToken, usersRest.getConvocatoriasAbiertas);
+router.get(constants.contextURL + constants.apiURL + "getConvocatoriasCerradas", usersRest.authenticateToken, usersRest.getConvocatoriasCerradas);
 
 //Imagen
 router.post(constants.contextURL + constants.apiURL + "/imageUpload", usersRest.authenticateToken, imageRest.upload, imageRest.processUpload);

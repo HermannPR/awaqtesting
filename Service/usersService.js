@@ -162,6 +162,59 @@ async function deleteUser(user_id){
     }
     return qResult;
 }
+/**
+ * @param {*} Conv
+ * @param {int} idUsuario
+ * @returns
+ */
+async function insertConvocatorias(Conv, idUsuario){
+    let qResult;
+    try{
+        let query = "INSERT INTO convocatorias (nombreConv, FechaCierre, sitio_web, region, organizacion, pais, descripcion, idUsuario) VALUES (?,?,?,?,?,?,?,?)";
+        let params = [
+            Conv.nombreConv,
+            Conv.FechaCierre,
+            Conv.sitio_web,
+            Conv.region,
+            Conv.organizacion,
+            Conv.pais,
+            Conv.descripcion,
+            idUsuario
+        ];
+        qResult = await dataSource.insertData(query, params);
+        return new dataSource.QueryResult(true, [Conv.idConvocatoria], 1, qResult.getGenId());
+    }
+    catch(err){
+        console.error('Error al insertar convocatoria:', err.message);
+        return new dataSource.QueryResult(false, [], 0, 0, err.message);
+    }
+}
+
+async function getConvocatoriasAbiertas() {
+    let qResult;
+    try {
+        let query = "SELECT * FROM convocatorias WHERE FechaCierre > NOW()";
+        qResult = await dataSource.getData(query);
+        return new dataSource.QueryResult(true, qResult.getRows(), qResult.getRows().length, 0);
+    }
+    catch(err) {
+        console.error('Error al obtener convocatorias abiertas:', err.message);
+        return new dataSource.QueryResult(false,  [], 0, 0, err.message);
+    }
+}
+
+async function getConvocatoriasCerradas() {
+    let qResult;
+    try {
+        let query = "SELECT * FROM convocatorias WHERE FechaCierre <= NOW()";
+        qResult = await dataSource.getData(query);
+        return new dataSource.QueryResult(true, qResult.getRows(), qResult.getRows().length, 0);
+    }
+    catch(err) {
+        console.error('Error al obtener convocatorias cerradas:', err.message);
+        return new dataSource.QueryResult(false, [], 0, 0, err.message);
+    }
+}
 
 module.exports = {
     getUsers,
@@ -169,5 +222,8 @@ module.exports = {
     insertUser,
     updateUser,
     deleteUser,
-    getValores
+    getValores,
+    insertConvocatorias,
+    getConvocatoriasAbiertas,
+    getConvocatoriasCerradas
 }

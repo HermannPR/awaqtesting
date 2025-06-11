@@ -1,6 +1,7 @@
 const userService = require('../../Service/usersService');
 const hashService = require('../../Service/hashPassword');
 const jwt = require('jsonwebtoken');
+const e = require('express');
 require('dotenv').config();
 
 const SECRET = process.env.SECRET;
@@ -293,7 +294,99 @@ async function deleteUser(req,res)
         return res.status(500).json(jsonError);
     }
 }
-
+/**
+ * @param {*} req 
+ * @param {*} res 
+ */
+async function insertConvocatorias(req, res)
+{
+    try
+    {
+        const conv = req.body;
+        const userId = req.params.idUsuario;
+        if(!conv)
+        {
+            return res.status(400).json({
+                "status" : "error",
+                "message" : "Convocatoria no proporcionada"
+            });
+        }
+        const result = await userService.insertConvocatorias(conv, userId);
+        return res.status(200).json({
+            "status" : "success",
+            "total" : result.changes,
+            "records" : result.data
+        });
+    }
+    catch(error)
+    {
+        let jsonError = {
+            "status" : "error",
+            "message" : error.message
+        };
+        console.log(error);
+        return res.status(500).json(jsonErrror);
+    }
+}
+/**
+ * @param {*} res
+ */
+async function getConvocatoriasAbiertas(res)
+{
+    try
+    {
+        const result = await userService.getConvocatoriasAbiertas();
+        return res.status(200).json({
+            "status" : "success",
+            "total" : result.rows.length,
+            "records" : result.rows
+        });
+    }
+    catch(error)
+    {
+        let jsonError = {
+            "status" : "error",
+            "message" : error.message
+        };
+        console.log(error);
+        return res.status(500).json(jsonError);
+    }
+}
+/**
+ * @param {*} res 
+ */
+async function getConvocatoriasCerradas(res)
+{
+    try
+    {
+        const result = await userService.getConvocatoriasCerradas();
+        return res.status(200).json({
+            "status" : "success",
+            "total" : result.rows.length,
+            "records" : result.rows
+        });
+    }
+    catch(error)
+    {
+        let jsonError = {
+            "status" : "error",
+            "message": error.message
+        };
+        console.log(error);
+        return res.status(500).json(jsonError);
+    }
+}
 module.exports = {
-    execLogin, authenticateToken, authenticateTokenAdmin, authenticateTokenSAdmin, getUsers, findUser, insertUser, updateUser, deleteUser
+    execLogin, 
+    authenticateToken, 
+    authenticateTokenAdmin, 
+    authenticateTokenSAdmin, 
+    getUsers, 
+    findUser, 
+    insertUser, 
+    updateUser, 
+    deleteUser,
+    insertConvocatorias,
+    getConvocatoriasAbiertas,
+    getConvocatoriasCerradas
 }
